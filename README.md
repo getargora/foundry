@@ -1,20 +1,32 @@
-# Pinga Boilerplate Panel
+# Argora Foundry
 
 [![StandWithUkraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
 
 [![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
 
-<div style="text-align:center">
-  <img src="https://getpinga.com/logo.svg" alt="Pinga" width="200">
-</div>
+**Argora Foundry** is a lightweight and extensible PHP boilerplate built to accelerate the development of modern control panels, SaaS platforms, and internal tools. Designed with developer productivity in mind, it combines a clean architecture, reusable components, and a ready-to-use user panel to help you launch faster—without compromising flexibility or quality.
 
-The Pinga PHP framework is an exceptional toolset that includes a collection of thoroughly tested third-party components, ideal for building robust and scalable web applications and APIs. Designed to optimize and streamline the development process, the framework allows developers to concentrate on delivering high-quality functionality and an exceptional user experience.
+## 🚀 Key Features
 
-One of the standout features of the Pinga PHP framework is its built-in user control panel. This control panel is a comprehensive and user-friendly interface that provides complete management of all aspects of your SaaS applications. With this boilerplate template, it's easy to integrate and implement the control panel into your projects, giving your users a seamless and intuitive experience.
+- **Modular Architecture** – Organize your code effortlessly with a clear, scalable structure inspired by proven patterns.
+- **Built-in Control Panel** – A modern and customizable UI template for managing users, settings, and services out of the box.
+- **SaaS-Ready** – Includes essential SaaS features like user authentication, roles & permissions, usage tracking, and more.
+- **Modern Stack** – Powered by PHP 8+, Slim Framework, Twig templates, and Tabler UI for a clean frontend.
+- **Extensible & Tested** – Designed to be extended with custom modules, and includes support for PHPUnit or Pest for reliable testing.
 
-Thanks to its rigorous testing and emphasis on quality and reliability, the Pinga PHP framework is suitable for projects of all sizes and complexities. Whether you're building a simple website or a sophisticated enterprise-level application, this framework provides the tools you need to get the job done efficiently and effectively. And with the boilerplate control panel, your SaaS applications will be up and running in no time.
+## 🛠️ Ideal For
 
-## Our set of components
+- SaaS startups launching fast without reinventing the wheel  
+- Developers building internal dashboards or admin panels  
+- Agencies delivering multiple client control panels from a common core
+
+## 🧱 Philosophy
+
+*Argora Foundry* is not a full-stack framework, but a focused foundation. It gives you the essentials—routing, user management, templates, modular structure—without locking you in. You stay in control of your stack, while we handle the heavy lifting.
+
+## Components
+
+(TBD)
 
 | Category | Package | Integrated | Alternative | Integrated |
 | --- | --- | --- | --- | --- |
