@@ -47,7 +47,12 @@
         "imefisto/psr-swoole-native": "^2.0.2",
         "chubbyphp/chubbyphp-static-file": "^1.3",
         "lasserafn/php-initial-avatar-generator": "^4.4",
-        "gettext/gettext": "^5.7.3"
+        "gettext/gettext": "^5.7.3",
+        "punic/punic": "^3.8.1",
+        "ramsey/uuid": "^4.9",
+        "giggsey/libphonenumber-for-php-lite": "^9.0.9",
+        "bjeavons/zxcvbn-php": "^1.4.2",
+        "mevdschee/php-crud-api": "^2.14.30",
     },
     "autoload": {
         "psr-4": {

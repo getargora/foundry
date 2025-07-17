@@ -1,5 +1,17 @@
 <?php
-require __DIR__.'/../vendor/autoload.php';
+/**
+ * Argora Foundry
+ *
+ * A modular PHP boilerplate for building SaaS applications, admin panels, and control systems.
+ *
+ * @package    App
+ * @author     Taras Kondratyuk <help@argora.org>
+ * @copyright  Copyright (c) 2025 Argora
+ * @license    MIT License
+ * @link       https://github.com/getargora/foundry
+ */
+
+require __DIR__ . '/../vendor/autoload.php';
 
 use Dotenv\Dotenv;
 
@@ -10,8 +22,10 @@ if (file_exists(__DIR__.'/.env')) {
 
 return [
     'env' => $_ENV['APP_ENV'] ?? 'production',
-    'name' => $_ENV['APP_NAME'] ?? 'Hezecom',
+    'name' => $_ENV['APP_NAME'] ?? 'Foundry',
     'url' => $_ENV['APP_URL'] ?? 'http://localhost',
+    'domain' => $_ENV['APP_DOMAIN'] ?? 'example.com',
+    'root' => $_ENV['APP_ROOT'] ?? '/var/www/panel',
     'timezone' => $_ENV['TIME_ZONE'] ?? 'UTC',
     'default' => $_ENV['DB_DRIVER'] ?? 'mysql',
     'connections' => [
@@ -19,9 +33,9 @@ return [
             'driver' => 'mysql',
             'host' => $_ENV['DB_HOST'] ?? '127.0.0.1',
             'port' => $_ENV['DB_PORT'] ?? '3306',
-            'database' => $_ENV['DB_DATABASE'] ?? 'forge',
-            'username' => $_ENV['DB_USERNAME'] ?? 'forge',
-            'password' => $_ENV['DB_PASSWORD'] ?? '',
+            'database' => $_ENV['DB_DATABASE'] ?? 'foundry',
+            'username' => $_ENV['DB_USERNAME'] ?? 'db_username',
+            'password' => $_ENV['DB_PASSWORD'] ?? 'db_password',
             'unix_socket' => $_ENV['DB_SOCKET'] ?? '',
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
@@ -38,23 +52,13 @@ return [
             'driver' => 'pgsql',
             'host' => $_ENV['DB_HOST'] ?? '127.0.0.1',
             'port' => $_ENV['DB_PORT'] ?? '5432',
-            'database' => $_ENV['DB_DATABASE'] ?? 'forge',
-            'username' => $_ENV['DB_USERNAME'] ?? 'forge',
-            'password' => $_ENV['DB_PASSWORD'] ?? '',
+            'database' => $_ENV['DB_DATABASE'] ?? 'foundry',
+            'username' => $_ENV['DB_USERNAME'] ?? 'db_username',
+            'password' => $_ENV['DB_PASSWORD'] ?? 'db_password',
             'charset' => 'utf8',
             'prefix' => '',
             'schema' => 'public',
             'sslmode' => 'prefer',
-        ],
-        'sqlsrv' => [
-            'driver' => 'sqlsrv',
-            'host' => $_ENV['DB_HOST'] ?? 'localhost',
-            'port' => $_ENV['DB_PORT'] ?? '1433',
-            'database' => $_ENV['DB_DATABASE'] ?? 'forge',
-            'username' => $_ENV['DB_USERNAME'] ?? 'forge',
-            'password' => $_ENV['DB_PASSWORD'] ?? '',
-            'charset' => 'utf8',
-            'prefix' => '',
         ],
     ],
     'mail' => [
@@ -68,5 +72,10 @@ return [
             'address' => $_ENV['MAIL_FROM_ADDRESS'] ?? 'hello@example.com',
             'name' => $_ENV['MAIL_FROM_NAME'] ?? 'Example',
         ],
+        'api_key' => $_ENV['MAIL_API_KEY'] ?? 'test-api-key',
+        'api_provider' => $_ENV['MAIL_API_PROVIDER'] ?? 'sendgrid',
+    ],
+    'payment' => [
+        'stripe' => $_ENV['STRIPE_SECRET_KEY'] ?? 'stripe-secret-key',
     ],
 ];
