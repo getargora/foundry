@@ -30,27 +30,18 @@
 
 | Category | Package | Integrated |
 | --- | --- | --- |
-| Authentication | [pinga/auth](https://packagist.org/packages/pinga/auth) | ✅ |
 | Storage | [league/flysystem](https://packagist.org/packages/league/flysystem) | ❌ |
 | Database | [pinga/db](https://packagist.org/packages/pinga/db) | ✅ |
-| DI | [php-di/php-di](https://packagist.org/packages/php-di/php-di) | ✅ |
-| PSR-7/17 | [nyholm/psr7](https://packagist.org/packages/nyholm/psr7) | ✅ |
-| Logging | [monolog/monolog](https://packagist.org/packages/monolog/monolog) | ✅ |
-| Templates | [twig/twig](https://packagist.org/packages/twig/twig) | ✅ |
 | Forms | [jarzon/form](https://packagist.org/packages/jarzon/form) | ❌ |
 | Cookies | [pinga/cookie](https://packagist.org/packages/pinga/cookie) or [dflydev/dflydev-fig-cookies] | ❌ |(https://packagist.org/packages/dflydev/dflydev-fig-cookies) | ❌ |
 | Session | [pinga/session](https://packagist.org/packages/pinga/session) or [compwright/php-session](compwright/php-session)<br>[neoflow/session](neoflow/session) | ❌ |
 | Cache | [pinga/cache](https://github.com/getpinga/cache) or [matthiasmullie/scrapbook](https://packagist.org/packages/matthiasmullie/scrapbook) | ❌ |
-| 2FA | [robthree/twofactorauth](https://packagist.org/packages/robthree/twofactorauth) | ❌ |
 | Backup | [PHPBU](https://phpbu.de/) | ❌ |
 | Payment | [utopia-php/pay](https://packagist.org/packages/utopia-php/pay) | ❌ |
-| Messaging | [utopia-php/messaging](https://packagist.org/packages/utopia-php/messaging) | ❌ |
-| User Audit | [utopia-php/audit](https://packagist.org/packages/utopia-php/audit) | ❌ |
 | DB Audit | [setbased/php-audit](https://packagist.org/packages/setbased/php-audit) | ❌ |
 | KYC | [Ballerine](https://github.com/ballerine-io/ballerine) | ❌ | N/A | ❌ |
 | Admin UI | [Tabler](https://github.com/tabler/tabler) | ✅ | ❌ | ❌ |
 | Benchmark | [eypsilon/MycroBench](https://packagist.org/packages/eypsilon/MycroBench) or [phpbench/phpbench](https://packagist.org/packages/phpbench/phpbench) | ❌ |
-| Tests | [Pest](https://pestphp.com/) | ❌ |
 
 ## 📦 Installation
 
