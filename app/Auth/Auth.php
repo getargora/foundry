@@ -1,4 +1,15 @@
 <?php
+/**
+ * Argora Foundry
+ *
+ * A modular PHP boilerplate for building SaaS applications, admin panels, and control systems.
+ *
+ * @package    App
+ * @author     Taras Kondratyuk <help@argora.org>
+ * @copyright  Copyright (c) 2025 Argora
+ * @license    MIT License
+ * @link       https://github.com/getargora/foundry
+ */
 
 namespace App\Auth;
 
@@ -13,6 +24,9 @@ use Pinga\Auth\ResetDisabledException;
 use Pinga\Auth\TokenExpiredException;
 use Pinga\Auth\TooManyRequestsException;
 use Pinga\Auth\UserAlreadyExistsException;
+use Pinga\Auth\UnknownIdException;
+use RobThree\Auth\TwoFactorAuth;
+use RobThree\Auth\Providers\Qr\BaconQrCodeProvider;
 
 /**
  * Auth
@@ -128,7 +142,7 @@ class Auth
      * @throws \Pinga\Auth\AttemptCancelledException
      * @throws \Pinga\Auth\AuthError
      */
-    public static function login($email, $password, $remember=null){
+    public static function login($email, $password, $remember=null, $code=null){
         $auth = self::$auth;
         try {
             if ($remember !='') {
@@ -140,8 +154,55 @@ class Auth
                 $rememberDuration = null;
             }
 
-            $auth->login($email, $password,$rememberDuration);
-            return true;
+            $auth->login($email, $password, $rememberDuration);
+
+            if ($auth->isArchived()) {
+                self::$auth->logOut();
+                redirect()->route('login')->with('error','User has been archived, please contact registry support');
+            }
+            if ($auth->isBanned()) {
+                self::$auth->logOut();
+                redirect()->route('login')->with('error','User has been banned, please contact registry support');
+            }
+            if ($auth->isPendingReview()) {
+                self::$auth->logOut();
+                redirect()->route('login')->with('error','User is pending review, please contact registry support');
+            }
+            if ($auth->isSuspended()) {
+                self::$auth->logOut();
+                redirect()->route('login')->with('error','User has been suspended, please contact registry support');
+            }
+
+            // check if a valid code is provided
+            global $container;
+            $db = $container->get('db');
+            $tfa_secret = $db->selectValue('SELECT tfa_secret FROM users WHERE id = ?', [$auth->getUserId()]);
+
+            if (!is_null($tfa_secret)) {
+                if (!is_null($code) && $code !== "" && preg_match('/^\d{6}$/', $code)) {
+                    // If tfa_secret exists and is not empty, verify the 2FA code
+                    $qrCodeProvider = new BaconQRCodeProvider($borderWidth = 0, $backgroundColour = '#ffffff', $foregroundColour = '#000000', $format = 'svg');
+                    $tfaService = new TwoFactorAuth(
+                        issuer: "Namingo",
+                        qrcodeprovider: $qrCodeProvider,
+                    );
+                    if ($tfaService->verifyCode($tfa_secret, $code, 0) === true) {
+                        // 2FA verification successful
+                        return true;
+                    } else {
+                        // 2FA verification failed
+                        self::$auth->logOut();
+                        redirect()->route('login')->with('error','Incorrect 2FA Code. Please check and enter the correct code. 2FA codes are time-sensitive. For continuous issues, contact support.');
+                        //return false; // Ensure to return false or handle accordingly
+                    }
+                } else {
+                    self::$auth->logOut();
+                    redirect()->route('login')->with('error','2FA Code Required. Please enter your 6-digit 2FA code to proceed with the login.');
+                    //return false;
+                }
+            } else {
+                return true;
+            }
         }
         catch (InvalidEmailException $e) {
             redirect()->route('login')->with('error','Wrong email address');
@@ -163,14 +224,16 @@ class Auth
      * @param $email
      * @throws \Pinga\Auth\AuthError
      */
-    public static function forgotPassword($email){
+    public static function forgotPassword($email,$username){
         $auth = self::$auth;
         try {
-            $auth->forgotPassword($email, function ($selector, $token) use ($email) {
+            $auth->forgotPassword($email, function ($selector, $token) use ($email,$username) {
                 $link = url('reset.password',[],['selector'=>urlencode($selector),'token'=>urlencode($token)]);
                 $message = file_get_contents(__DIR__.'/../../resources/views/auth/mail/reset-password.html');
-                $message = str_replace(['{link}','{app_name}'],[$link,envi('APP_NAME')],$message);
-                $subject = 'Reset Password';
+                $placeholders = ['{user_first_name}', '{link}', '{app_name}'];
+                $replacements = [ucfirst($username), $link, envi('APP_NAME')];
+                $message = str_replace($placeholders, $replacements, $message);            
+                $subject = '[' . envi('APP_NAME') . '] Action Required: Reset Your Password';
                 $from = ['email'=>envi('MAIL_FROM_ADDRESS'), 'name'=>envi('MAIL_FROM_NAME')];
                 $to = ['email'=>$email, 'name'=>''];
                 // send message
@@ -257,6 +320,23 @@ class Auth
     public static function changeCurrentPassword($oldPassword, $newPassword){
         $auth = self::$auth;
         try {
+            global $container;
+            $db = $container->get('db');
+            $currentDateTime = new \DateTime();
+            $currentDate = $currentDateTime->format('Y-m-d H:i:s.v'); // Current timestamp
+            $db->insert(
+                'users_audit',
+                [
+                    'user_id' => $_SESSION['auth_user_id'],
+                    'user_event' => 'user.update.password',
+                    'user_resource' => 'control.panel',
+                    'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+                    'user_ip' => get_client_ip(),
+                    'user_location' => get_client_location(),
+                    'event_time' => $currentDate,
+                    'user_data' => null
+                ]
+            );
             $auth->changePassword($oldPassword, $newPassword);
             redirect()->route('profile')->with('success','Password has been changed');
         }
@@ -268,6 +348,55 @@ class Auth
         }
         catch (TooManyRequestsException $e) {
             redirect()->route('profile')->with('error','Too many requests, try again later');
+        }
+    }
+
+    /**
+     * Impersonate a user
+     * @param $userId
+     * @throws \Pinga\Auth\AuthError
+     */
+    public static function impersonateUser($userId){
+        $auth = self::$auth;
+        try {
+            $auth->admin()->logInAsUserById($userId);
+            redirect()->route('home')->with('success','Registrar impersonation started');
+        }
+        catch (UnknownIdException $e) {
+            redirect()->route('registrars')->with('error','Unknown ID');
+        }
+        catch (EmailNotVerifiedException $e) {
+            redirect()->route('registrars')->with('error','Email address not verified');
+        }
+    }
+
+    /**
+     * Leave impersonation mode
+     * @throws \Pinga\Auth\AuthError
+     */
+    public static function leaveImpersonation(){
+        $auth = self::$auth;
+        if (self::$auth->isLoggedIn()) {
+            $auth->leaveImpersonation();
+            redirect()->route('registrars')->with('success','Left registrar panel successfully');
+        }
+        else {
+            return false;
+        }
+    }
+
+    /**
+     * Log out user from all other sessions except the current one
+     * @throws \Pinga\Auth\AuthError
+     */
+    public static function logoutEverywhereElse() {
+        $auth = self::$auth;
+        try {
+            $auth->logOutEverywhereElse();
+            redirect()->route('profile')->with('success', 'Logged out from all other devices');
+        }
+        catch (NotLoggedInException $e) {
+            redirect()->route('login')->with('error', 'You are not logged in');
         }
     }
 

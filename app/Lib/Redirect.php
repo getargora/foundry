@@ -1,9 +1,18 @@
-<?php namespace App\Lib;
+<?php
 /**
- * Redirect
+ * Argora Foundry
  *
- * @author    Hezekiah O. <support@hezecom.com>
+ * A modular PHP boilerplate for building SaaS applications, admin panels, and control systems.
+ *
+ * @package    App
+ * @author     Taras Kondratyuk <help@argora.org>
+ * @copyright  Copyright (c) 2025 Argora
+ * @license    MIT License
+ * @link       https://github.com/getargora/foundry
  */
+
+namespace App\Lib;
+
 class Redirect
 {
     protected $name;
@@ -39,30 +48,28 @@ class Redirect
         return $this;
     }
 
-	public function redirect()
-	{
-		if (getenv('SWOOLE_ENABLED')) {
-			// Running in Swoole
-			if (!$this->response->isSent()) {
-				$this->response = $this->response
-					->withHeader('Location', $this->name)
-					->withStatus($this->status);
-			} else {
-				$this->response->getBody()->write(
-					sprintf('<script>window.location.replace("%s");</script>', $this->name)
-				);
-			}
-			return $this->response;
-		} else {
-			// Running in nginx/caddy/etc
-			if (headers_sent() === false) {
-				header('Location: ' . $this->name, true, $this->status);
-				exit;
-			}
-			exit('window.location.replace("' . $this->name . '");');
-		}
-	}
+    public function redirect()
+    {
+        if (getenv('SWOOLE_ENABLED')) {
+            // Running in Swoole
+            if (!$this->response->isSent()) {
+                $this->response = $this->response
+                    ->withHeader('Location', $this->name)
+                    ->withStatus($this->status);
+            } else {
+                $this->response->getBody()->write(
+                    sprintf('<script>window.location.replace("%s");</script>', $this->name)
+                );
+            }
+            return $this->response;
+        } else {
+            // Running in nginx/caddy/etc
+            if (headers_sent() === false) {
+                header('Location: ' . $this->name, true, $this->status);
+                exit;
+            }
+            exit('window.location.replace("' . $this->name . '");');
+        }
+    }
     
 }
-
-

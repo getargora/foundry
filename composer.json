@@ -53,6 +53,9 @@
         "giggsey/libphonenumber-for-php-lite": "^9.0.9",
         "bjeavons/zxcvbn-php": "^1.4.2",
         "mevdschee/php-crud-api": "^2.14.30",
+        "robthree/twofactorauth": "^3.0.2",
+        "utopia-php/messaging": "^0.18.1",
+        "filips123/monolog-phpmailer": "^2.0",
     },
     "autoload": {
         "psr-4": {
