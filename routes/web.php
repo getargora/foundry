@@ -46,9 +46,8 @@ $app->group('', function ($route) {
     $route->get('/reset-password', PasswordController::class.':resetPassword')->setName('reset.password');
     $route->get('/update-password', PasswordController::class.':createUpdatePassword')->setName('update.password');
     $route->post('/update-password', PasswordController::class.':updatePassword');
-    
+
     $route->post('/webhook/adyen', FinancialsController::class .':webhookAdyen')->setName('webhookAdyen');
-    $route->post('/webhook/sumsub', ContactsController::class .':webhookSumsub')->setName('webhookSumsub');
 })->add(new GuestMiddleware($container));
 
 $app->group('', function ($route) {
@@ -74,7 +73,6 @@ $app->group('', function ($route) {
     $route->map(['GET', 'POST'], '/payment-success-nicky', FinancialsController::class .':successNicky')->setName('successNicky');
     $route->map(['GET', 'POST'], '/payment-cancel', FinancialsController::class .':cancel')->setName('cancel');
     $route->get('/transactions', FinancialsController::class .':transactions')->setName('transactions');
-    $route->get('/overview', FinancialsController::class .':overview')->setName('overview');
 
     $route->post('/clear-cache', HomeController::class .':clearCache')->setName('clearCache');
 
@@ -83,8 +81,6 @@ $app->group('', function ($route) {
     $route->get('/ticket/{ticket}', SupportController::class . ':viewTicket')->setName('viewTicket');
     $route->post('/support/reply', SupportController::class . ':replyTicket')->setName('replyTicket');
     $route->post('/support/status', SupportController::class . ':statusTicket')->setName('statusTicket');
-    $route->get('/support/docs', SupportController::class .':docs')->setName('docs');
-    $route->get('/support/media', SupportController::class .':mediakit')->setName('mediakit');
 
     $route->get('/profile', ProfileController::class .':profile')->setName('profile');
     $route->get('/profile/notifications', ProfileController::class .':notifications')->setName('notifications');
