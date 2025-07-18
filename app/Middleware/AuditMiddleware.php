@@ -15,15 +15,19 @@ namespace App\Middleware;
 
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
+use Pinga\Session;
 
-class GuestMiddleware extends Middleware
+class AuditMiddleware extends Middleware
 {
+
     public function __invoke(Request $request, RequestHandler $handler)
     {
-        $response = $handler->handle($request);
-        if($this->container->get('auth')->isLogin()) {
-            return redirect()->route('home');
+        if (isset($_SESSION['auth_user_id'])) {
+            $userId = (int)$_SESSION['auth_user_id'];
+            $this->container->get('db')->exec("SET @audit_usr_id = $userId");
+            $this->container->get('db')->exec("SET @audit_ses_id = " . crc32(\Pinga\Session\Session::id()));
         }
-        return $response;
+        return $handler->handle($request);
     }
+
 }
