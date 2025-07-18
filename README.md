@@ -29,7 +29,7 @@
 (TBD)
 
 | Category | Package | Integrated |
-| --- | --- | --- | --- | --- |
+| --- | --- | --- |
 | Authentication | [pinga/auth](https://packagist.org/packages/pinga/auth) | ✅ |
 | Storage | [league/flysystem](https://packagist.org/packages/league/flysystem) | ❌ |
 | Database | [pinga/db](https://packagist.org/packages/pinga/db) | ✅ |
@@ -69,6 +69,7 @@ php bin/install-db.php
 php -S localhost:8080 -t public
 ```
 
-## ℹ️ Details
+## 🙏 Acknowledgments
 
-Based on Slim 4 and hezecom/slim-starter
+Argora Foundry is based on [hezecom/slim-starter](https://github.com/omotsuebe/slim-starter), an excellent Slim Framework 4 starter project by [Hezekiah Omotsuebe](https://github.com/omotsuebe).  
+We’ve extended and restructured it for SaaS platforms, admin panels, and modern boilerplate needs.
