@@ -39,18 +39,18 @@
                 </div>
                 <div class="col d-flex flex-column">
                   <div class="card-body">
-				<form action="{{route('change.password')}}" name="register" method="post">
-					{{ csrf.field | raw }}
+                <form action="{{route('change.password')}}" name="register" method="post">
+                    {{ csrf.field | raw }}
                     <h2 class="mb-4">Invoices</h2>
                     <h3 class="card-title">Profile Details</h3>
                     <div class="row g-3">
                       <div class="col-md">
                         <div class="form-label">User Name</div>
-						<div class="form-control-plaintext">{{ username }}</div>
+                        <div class="form-control-plaintext">{{ username }}</div>
                       </div>
                       <div class="col-md">
                         <div class="form-label">Email</div>
-						<div class="form-control-plaintext">{{ email }}</div>
+                        <div class="form-control-plaintext">{{ email }}</div>
                       </div>
                       <div class="col-md">
                         <div class="form-label">Status</div>
@@ -66,16 +66,16 @@
                       <div class="col-md">
                         <div class="form-label required">Old Password</div>
                         <input type="password" class="form-control{{ errors.old_password ? ' is-invalid' : '' }}" name="old_password" placeholder="Enter old password" required>
-						{% if errors.old_password %}
-							<small class="form-hint">{{ errors.old_password | first }}</small>
-						{% endif %}
+                        {% if errors.old_password %}
+                            <small class="form-hint">{{ errors.old_password | first }}</small>
+                        {% endif %}
                       </div>
                       <div class="col-md">
                         <div class="form-label required">New Password</div>
                         <input type="password" class="form-control{{ errors.new_password ? ' is-invalid' : '' }}" name="new_password" placeholder="Enter new password" required>
-						{% if errors.new_password %}
-							<small class="form-hint">{{ errors.new_password | first }}</small>
-						{% endif %}
+                        {% if errors.new_password %}
+                            <small class="form-hint">{{ errors.new_password | first }}</small>
+                        {% endif %}
                       </div>
                     </div>
                   </div>
@@ -89,24 +89,12 @@
                       </button>
                     </div>
                   </div>
-				  </form>
+                  </form>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <footer class="footer footer-transparent d-print-none">
-          <div class="container-xl">
-              <div class="col-12 col-lg-auto mt-3 mt-lg-0">
-                <ul class="list-inline list-inline-dots mb-0">
-                  <li class="list-inline-item">
-                    Copyright &copy; 2023
-                    <a href="https://getpinga.com" class="link-secondary">Pinga</a>.
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </footer>
+        {% include 'partials/footer.twig' %}
       </div>
 {% endblock %}

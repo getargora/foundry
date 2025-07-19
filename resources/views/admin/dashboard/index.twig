@@ -1,6 +1,6 @@
 {% extends "layouts/app.twig" %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}{{ __('Dashboard') }}{% endblock %}
 
 {% block content %}
       <div class="page-wrapper">
@@ -309,13 +309,13 @@
                         </tr>
                       </thead>
                       <tbody>
-						{% for user in users %}
-							<tr>
-							    <td><input class="form-check-input m-0 align-middle" type="checkbox" aria-label="Select user"></td>
-								<td>{{ user.id }}</td>
-								<td>{{ user.username }}</td>
-								<td>{{ user.email }}</td>
-								<td>{{ user.status }}</td>
+                        {% for user in users %}
+                            <tr>
+                                <td><input class="form-check-input m-0 align-middle" type="checkbox" aria-label="Select user"></td>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.status }}</td>
                           <td class="text-end">
                             <span class="dropdown">
                               <button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
@@ -329,8 +329,8 @@
                               </div>
                             </span>
                           </td>
-							</tr>
-						{% endfor %}
+                            </tr>
+                        {% endfor %}
                       </tbody>
                     </table>
                   </div>
@@ -362,18 +362,6 @@
             </div>
           </div>
         </div>
-        <footer class="footer footer-transparent d-print-none">
-          <div class="container-xl">
-              <div class="col-12 col-lg-auto mt-3 mt-lg-0">
-                <ul class="list-inline list-inline-dots mb-0">
-                  <li class="list-inline-item">
-                    Copyright &copy; 2023
-                    <a href="https://getpinga.com" class="link-secondary">Pinga</a>.
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </footer>
+        {% include 'partials/footer.twig' %}
       </div>
 {% endblock %}
