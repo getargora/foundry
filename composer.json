@@ -81,8 +81,6 @@
         "cp -r vendor/argora/tabler-assets/public/* public/assets/"
       ]
     },
-    "minimum-stability": "stable",
-    "prefer-stable": true,
     "support": {
         "issues": "https://github.com/getargora/foundry/issues",
         "source": "https://github.com/getargora/foundry"
