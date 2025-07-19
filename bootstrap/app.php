@@ -78,13 +78,13 @@ $container->set('pdo', function () use ($pdo) {
     return $pdo;
 });
 
-$container->set('db_audit', function () use ($db_audit) {
+/* $container->set('db_audit', function () use ($db_audit) {
     return $db_audit;
 });
 
 $container->set('pdo_audit', function () use ($pdo_audit) {
     return $pdo_audit;
-});
+}); */
 
 $container->set('auth', function() {
     //$responseFactory = new \Nyholm\Psr7\Factory\Psr17Factory();
@@ -130,8 +130,12 @@ $container->set('view', function ($container) {
     $lang_full = Language::getName($desiredLanguage, $uiLang);
     if ($uiLang === 'xx') {
         $lang = 'lang_name';
-    } else {
+    } elseif (!empty($lang_full) && str_contains($lang_full, ' (')) {
         $lang = ucfirst(trim(strstr($lang_full, ' (', true)));
+    } elseif (!empty($lang_full)) {
+        $lang = ucfirst(trim($lang_full));
+    } else {
+        $lang = 'en_US';
     }
 
     $languageFile = '../lang/' . $desiredLanguage . '/messages.po';

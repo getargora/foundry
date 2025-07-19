@@ -46,6 +46,15 @@ try {
     }
     echo "Created new database '$databaseName'\n";
 
+    if ($dbType == 'mysql') {
+        $pdo = new PDO("mysql:host=$host;dbname=$databaseName", $username, $password);
+    } elseif ($dbType == 'postgresql') {
+        $pdo = new PDO("pgsql:host=$host;dbname=$databaseName", $username, $password);
+    } elseif ($dbType == 'sqlite') {
+        $pdo = new PDO("sqlite:" . __DIR__ . "/../$databaseName");
+    }
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
     // Import SQL file
     $baseDir = realpath(__DIR__ . '/../database');
     $driver = strtolower($dbType);
@@ -74,5 +83,5 @@ try {
     echo "Imported SQL file '$sqlFile' into database '$databaseName'\n";
 
 } catch (PDOException $e) {
-    echo $e->getMessage();
+    echo $e->getMessage() . PHP_EOL;
 }

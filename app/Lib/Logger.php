@@ -134,7 +134,7 @@ class Logger extends \Monolog\Logger
         if ($enable) {
             self::htmlError();
         } else {
-            $logger = new Logger('errors');
+            $logger = new Logger('Foundry');
             ErrorHandler::register($logger);
 
             set_exception_handler(function ($e) use ($logger) {

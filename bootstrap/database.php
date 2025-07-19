@@ -14,7 +14,7 @@
 use Pinga\Db\PdoDatabase;
 use App\Lib\Logger;
 
-$log = Logger::getInstance('CP');
+$log = Logger::getInstance('Database');
 
 // Load database config
 $config = config('connections');

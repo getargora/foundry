@@ -45,8 +45,7 @@ try {
         $dsn = "pgsql:host=$dbHost;dbname=$dbName";
         $pdo = new PDO($dsn, $dbUser, $dbPass);
     } elseif ($dbDriver == 'sqlite') {
-        $dsn = "sqlite:/var/www/cp/registry.db";
-        $pdo = new PDO($dsn);
+        $pdo = new PDO("sqlite:" . __DIR__ . '/../foundry.db');
     }
 
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

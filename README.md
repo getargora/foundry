@@ -51,12 +51,15 @@ To create a new project using Argora Foundry:
 composer create-project argora/foundry your-project-name
 cd your-project-name
 cp env-sample .env
+chmod -R 775 logs cache
+chown -R www-data:www-data logs cache
 ```
 
-Make sure to configure your `.env` with your database and app settings.
+Configure your `.env` with database and app settings, and set your admin credentials in `bin/create-admin-user.php`.
 
 ```bash
 php bin/install-db.php
+php bin/create-admin-user.php
 php -S localhost:8080 -t public
 ```
 
