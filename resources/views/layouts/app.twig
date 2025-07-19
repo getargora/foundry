@@ -1,16 +1,16 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ _lang ?: 'en' }}" dir="{{ _lang in ['ar', 'ar_SA'] ? 'rtl' : 'ltr' }}"{% if screen_mode == 'dark' %} data-bs-theme="dark"{% endif %}{% if theme is not defined or theme is empty %} data-bs-theme-primary="blue"{% else %} data-bs-theme-primary="{{ theme }}"{% endif %}>
   <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
     <title>{% block title %}{% endblock %} | Foundry</title>
     <!-- CSS files -->
-	{% include 'partials/css.twig' %}
+    {% include 'partials/css.twig' %}
     <style>
       @import url('https://rsms.me/inter/inter.css');
       :root {
-      	--tblr-font-sans-serif: Inter, -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif;
+          --tblr-font-sans-serif: Inter, -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif;
       }
     </style>
   </head>
@@ -39,12 +39,12 @@
             </div>
             <div class="d-none d-md-flex">
               <a href="/mode" class="nav-link px-0 hide-theme-dark" title="Enable dark mode" data-bs-toggle="tooltip"
-		   data-bs-placement="bottom">
+           data-bs-placement="bottom">
                 <!-- Download SVG icon from http://tabler-icons.io/i/moon -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" /></svg>
               </a>
               <a href="/mode" class="nav-link px-0 hide-theme-light" title="Enable light mode" data-bs-toggle="tooltip"
-		   data-bs-placement="bottom">
+           data-bs-placement="bottom">
                 <!-- Download SVG icon from http://tabler-icons.io/i/sun -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="4" /><path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7" /></svg>
               </a>
@@ -135,7 +135,7 @@
             </div>
             <div class="nav-item dropdown">
               <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu">
-                <span class="avatar avatar-sm" style="background-image: url(/avatar)"></span>
+                <span class="avatar bg-{% if roles == 0 %}primary{% else %}green{% endif %}-lt">{{ auth.user.username|slice(0, 2)|upper }}</span>
                 <div class="d-none d-xl-block ps-2">
                   <div>{{auth.user.username}}</div>
                   <div class="mt-1 small text-muted">{{auth.user.email}}</div>
