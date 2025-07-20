@@ -13,7 +13,7 @@
  */
 
 if ($argc < 2) {
-    echo "Usage: php make-controller.php [Name]\n";
+    echo "Usage: php create-controller.php [Name]\n";
     exit(1);
 }
 

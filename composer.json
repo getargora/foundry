@@ -77,7 +77,6 @@
         "@copy-tabler"
       ],
       "copy-tabler": [
-        "mkdir -p public/assets",
         "cp -r vendor/argora/tabler-assets/public/* public/assets/"
       ]
     },
