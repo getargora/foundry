@@ -17,6 +17,7 @@ use App\Controllers\HomeController;
 use App\Controllers\ProfileController;
 use App\Controllers\UsersController;
 use App\Controllers\FinancialsController;
+use App\Controllers\OrdersController;
 use App\Controllers\SupportController;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\GuestMiddleware;
@@ -59,6 +60,12 @@ $app->group('', function ($route) {
     $route->post('/user/update', UsersController::class . ':updateUserProcess')->setName('updateUserProcess');
     $route->get('/user/impersonate/{user}', UsersController::class . ':impersonateUser')->setName('impersonateUser');
     $route->get('/leave_impersonation', UsersController::class . ':leave_impersonation')->setName('leave_impersonation');
+    
+    $route->get('/orders', OrdersController::class .':listOrders')->setName('listOrders');
+    $route->get('/orders/view', OrdersController::class .':viewOrder')->setName('viewOrder');
+    $route->get('/orders/create', OrdersController::class .':createOrder')->setName('createOrder');
+    $route->get('/orders/edit', OrdersController::class .':editOrder')->setName('editOrder');
+    $route->get('/orders/delete', OrdersController::class .':deleteOrder')->setName('deleteOrder');
 
     $route->get('/invoices', FinancialsController::class .':invoices')->setName('invoices');
     $route->get('/invoice/{invoice}', FinancialsController::class . ':viewInvoice')->setName('viewInvoice');

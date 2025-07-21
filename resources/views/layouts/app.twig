@@ -7,7 +7,7 @@
     <title>{% block title %}{% endblock %} | Foundry</title>
     <meta name="theme-color" content="#066fd1">
     <!-- CSS files -->
-{% if route_is('transactions') or route_is('users') or is_current_url('ticketview') or route_is('invoices') or route_is('profile') %}{% include 'partials/css-tables.twig' %}{% else %}{% include 'partials/css.twig' %}{% endif %}
+{% if route_is('transactions') or route_is('users') or route_is('orders') or is_current_url('ticketview') or route_is('invoices') or route_is('profile') %}{% include 'partials/css-tables.twig' %}{% else %}{% include 'partials/css.twig' %}{% endif %}
   </head>
   <body>
     <div class="page">
@@ -74,6 +74,23 @@
                       {{ __('Dashboard') }}
                     </span>
                   </a>
+                </li>
+                <li {{ is_current_url('listOrders') or 'order' in currentUri ? 'class="nav-item dropdown active"' : 'class="nav-item dropdown"' }}>
+                  <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                    <span class="nav-link-icon d-md-none d-lg-inline-block"><svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M7 9m0 2a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z"></path><path d="M14 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path><path d="M17 9v-2a2 2 0 0 0 -2 -2h-10a2 2 0 0 0 -2 2v6a2 2 0 0 0 2 2h2"></path></svg>
+                    </span>
+                    <span class="nav-link-title">
+                      {{ __('Orders') }}
+                    </span>
+                  </a>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="{{route('listOrders')}}">
+                      {{ __('List Orders') }}
+                    </a>
+                    <a class="dropdown-item" href="{{route('createOrder')}}">
+                      {{ __('Create Order') }}
+                    </a>
+                  </div>
                 </li>
                 <li {{ is_current_url('deposit') or is_current_url('transactions') or is_current_url('invoices') or is_current_url('successStripe') or 'invoice' in currentUri ? 'class="nav-item dropdown active"' : 'class="nav-item dropdown"' }}>
                   <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
@@ -248,6 +265,8 @@
     {% include 'partials/js-transactions.twig' %}
 {% elseif route_is('users') %}
     {% include 'partials/js-users.twig' %}
+{% elseif route_is('orders') %}
+    {% include 'partials/js-orders.twig' %}
 {% elseif is_current_url('ticketview') %}
     {% include 'partials/js-support.twig' %}
 {% elseif route_is('invoices') %}

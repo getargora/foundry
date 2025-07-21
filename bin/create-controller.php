@@ -50,7 +50,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Container\ContainerInterface;
 
-class $name extends Controller
+class $class extends Controller
 {
     public function index(Request \$request, Response \$response): Response
     {
