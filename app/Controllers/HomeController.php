@@ -13,7 +13,6 @@
 
 namespace App\Controllers;
 
-use App\Models\User;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Container\ContainerInterface;
@@ -27,9 +26,28 @@ class HomeController extends Controller
 
     public function dashboard(Request $request, Response $response)
     {
-        $userModel = new User($this->container->get('db'));
-        $users = $userModel->getAllUsers();
-        return view($response,'admin/dashboard/index.twig', compact('users'));
+        $db = $this->container->get('db');
+
+        // Total counts
+        $userCount = $db->selectValue('SELECT COUNT(*) FROM users');
+        $orderCount = $db->selectValue('SELECT COUNT(*) FROM orders');
+        $invoiceCount = $db->selectValue('SELECT COUNT(*) FROM invoices');
+        $ticketCount = $db->selectValue('SELECT COUNT(*) FROM support_tickets');
+
+        // Filtered counts
+        $pendingOrders = $db->selectValue('SELECT COUNT(*) FROM orders WHERE status = ?', ['pending']);
+        $unpaidInvoices = $db->selectValue('SELECT COUNT(*) FROM invoices WHERE payment_status = ?', ['unpaid']);
+        $openTickets = $db->selectValue('SELECT COUNT(*) FROM support_tickets WHERE status = ?', ['Open']);
+
+        return view($response, 'admin/dashboard/index.twig', [
+            'userCount' => $userCount,
+            'orderCount' => $orderCount,
+            'invoiceCount' => $invoiceCount,
+            'ticketCount' => $ticketCount,
+            'pendingOrders' => $pendingOrders,
+            'unpaidInvoices' => $unpaidInvoices,
+            'openTickets' => $openTickets
+        ]);
     }
 
     public function mode(Request $request, Response $response)
