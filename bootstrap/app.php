@@ -154,13 +154,17 @@ $container->set('view', function ($container) {
 
     $staticDir = realpath(__DIR__ . '/../public/static');
 
-    if (file_exists($staticDir . '/logo.svg')) {
-        $logoPath = '/static/logo.svg';
-    } elseif (file_exists($staticDir . '/logo.png')) {
-        $logoPath = '/static/logo.png';
+    $useBw = ($_SESSION['_screen_mode'] ?? 'light') === 'dark';
+    $baseName = $useBw ? 'logo-bw' : 'logo';
+
+    if (file_exists("$staticDir/{$baseName}.svg")) {
+        $logoPath = "/static/{$baseName}.svg";
+    } elseif (file_exists("$staticDir/{$baseName}.png")) {
+        $logoPath = "/static/{$baseName}.png";
     } else {
-        $logoPath = '/static/logo.default.svg';
+        $logoPath = "/static/{$baseName}.default.svg";
     }
+
     $view->getEnvironment()->addGlobal('logoPath', $logoPath);
 
     if (isset($_SESSION['_screen_mode'])) {
