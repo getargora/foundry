@@ -29,7 +29,12 @@ $databaseName = $_ENV['DB_DATABASE'];
 $tableName = readline('Enter table name: ');
 
 // Connect to the database using the PDO driver
-$db = new PdoDatabase("mysql:host=$host;dbname=$databaseName;charset=utf8mb4", $username, $password);
+$pdo = new PDO("mysql:host=$host;dbname=$databaseName;charset=utf8mb4", $username, $password, [
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+]);
+
+$db = Pinga\Db\PdoDatabase::fromPdo($pdo);
 
 // Get the column names and types for the specified table
 $columnData = $db->select('DESCRIBE ' . $tableName);
@@ -37,8 +42,31 @@ $columnData = $db->select('DESCRIBE ' . $tableName);
 // Create the class name based on the table name (e.g. "users" -> "User")
 $className = ucwords($tableName, '_');
 
+// Prepare dynamic parts
+$createParams = implode(', ', array_map(fn($col) => '$' . $col['Field'], $columnData));
+$quotedAssignments = implode("\n        ", array_map(fn($col) =>
+    '$' . $col['Field'] . ' = $this->db->quote($' . $col['Field'] . ');', $columnData));
+$insertFields = implode(', ', array_map(fn($col) => $col['Field'], $columnData));
+$insertValues = implode(', ', array_map(fn($col) => '$' . $col['Field'], $columnData));
+$updateParams = implode(', ', array_map(fn($col) => $col['Field'] . ' = $' . $col['Field'], $columnData));
+$updateArrayParams = implode(', ', array_map(fn($col) => '$' . $col['Field'], $columnData));
+$updateFunctionParams = implode(', ', array_map(fn($col) => '$' . $col['Field'], $columnData));
+
 // Generate the PHP code for the CRUD model based on the column data
 $modelCode = <<<PHP
+<?php
+/**
+ * Argora Foundry
+ *
+ * A modular PHP boilerplate for building SaaS applications, admin panels, and control systems.
+ *
+ * @package    App
+ * @author     Taras Kondratyuk <help@argora.org>
+ * @copyright  Copyright (c) 2025 Argora
+ * @license    MIT License
+ * @link       https://github.com/getargora/foundry
+ */
+
 namespace App\Models;
 
 use Pinga\Db\PdoDatabase;
@@ -57,43 +85,25 @@ class $className
         return \$this->db->select('SELECT * FROM $tableName');
     }
 
-    public function get$classNameById(\$id)
+    public function get{$className}ById(\$id)
     {
         return \$this->db->select('SELECT * FROM $tableName WHERE id = ?', [\$id])->fetch();
     }
 
-    public function create$className(${
-        implode(', ', array_map(function ($column) {
-            return '$' . $column['Field'];
-        }, $columnData))
-    })
+    public function create$className($createParams)
     {
-        ${implode("\n        ", array_map(function ($column) {
-            return '$' . $column['Field'] . ' = $this->db->quote($' . $column['Field'] . ');';
-        }, $columnData))}
+        $quotedAssignments
 
-        \$this->db->insert('INSERT INTO $tableName (${implode(', ', array_map(function ($column) {
-            return $column['Field'];
-        }, $columnData))}) VALUES (${implode(', ', array_map(function ($column) {
-            return '$' . $column['Field'];
-        }, $columnData))})');
+        \$this->db->insert('INSERT INTO $tableName ($insertFields) VALUES ($insertValues)');
 
         return \$this->db->lastInsertId();
     }
 
-    public function update$className(\$id${implode(', ', array_map(function ($column) {
-        return ', $' . $column['Field'];
-    }, $columnData))})
+    public function update$className(\$id, $updateFunctionParams)
     {
-        ${implode("\n        ", array_map(function ($column) {
-            return '$' . $column['Field'] . ' = $this->db->quote($' . $column['Field'] . ');';
-        }, $columnData))}
+        $quotedAssignments
 
-        \$this->db->update('UPDATE $tableName SET ${implode(', ', array_map(function ($column) {
-            return $column['Field'] . ' = $' . $column['Field'];
-        }, $columnData))} WHERE id = ?', array_merge([\$id], array_map(function ($column) {
-            return '$' . $column['Field'];
-        }, $columnData)));
+        \$this->db->update('UPDATE $tableName SET $updateParams WHERE id = ?', array_merge([\$id], [$updateArrayParams]));
 
         return true;
     }
@@ -108,7 +118,11 @@ class $className
 PHP;
 
 // Save the generated PHP code to a file
-file_put_contents(__DIR__ . "/app/Models/$className.php", $modelCode);
+$targetPath = __DIR__ . "/../app/Models/$className.php";
+if (file_put_contents($targetPath, $modelCode) === false) {
+    fwrite(STDERR, "Error: Failed to write model file to $targetPath\n");
+    exit(1);
+}
 
 // Output a success message
 echo "CRUD model for table '$tableName' generated successfully.\n";
