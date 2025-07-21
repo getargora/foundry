@@ -155,3 +155,39 @@ CREATE TABLE "invoices" (
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (billing_contact_id) REFERENCES users_contact(id)
 );
+
+CREATE TABLE "orders" (
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "user_id" INTEGER NOT NULL,
+    "service_type" TEXT NOT NULL,
+    "service_data" TEXT DEFAULT NULL,
+    "status" TEXT NOT NULL DEFAULT 'pending',
+    "amount_due" REAL NOT NULL,
+    "currency" TEXT NOT NULL DEFAULT 'EUR',
+    "invoice_id" INTEGER DEFAULT NULL,
+    "created_at" TEXT DEFAULT CURRENT_TIMESTAMP,
+    "paid_at" TEXT,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE SET NULL
+);
+
+CREATE INDEX idx_orders_user_service_status ON orders(user_id, service_type, status);
+
+CREATE TABLE "transactions" (
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "user_id" INTEGER NOT NULL,
+    "related_entity_type" TEXT NOT NULL,
+    "related_entity_id" INTEGER NOT NULL,
+    "type" TEXT NOT NULL DEFAULT 'debit',
+    "category" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "amount" REAL NOT NULL,
+    "currency" TEXT NOT NULL DEFAULT 'EUR',
+    "status" TEXT NOT NULL DEFAULT 'completed',
+    "created_at" TEXT DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_transactions_user_entity ON transactions(user_id, related_entity_type, related_entity_id);

@@ -154,4 +154,40 @@ CREATE TABLE IF NOT EXISTS "invoices" (
 ALTER TABLE invoices ADD FOREIGN KEY (user_id) REFERENCES users(id);
 ALTER TABLE invoices ADD FOREIGN KEY (billing_contact_id) REFERENCES users_contact(id);
 
+CREATE TABLE IF NOT EXISTS "orders" (
+     "id" SERIAL PRIMARY KEY,
+     "user_id" INTEGER NOT NULL,
+     "service_type" VARCHAR(32) NOT NULL,
+     "service_data" JSON DEFAULT NULL,
+     "status" VARCHAR(16) NOT NULL DEFAULT 'pending',
+     "amount_due" NUMERIC(12,2) NOT NULL,
+     "currency" CHAR(3) NOT NULL DEFAULT 'EUR',
+     "invoice_id" INTEGER DEFAULT NULL,
+     "created_at" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+     "paid_at" TIMESTAMP(3),
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE SET NULL
+);
+
+CREATE INDEX idx_orders_user_service_status ON orders(user_id, service_type, status);
+
+CREATE TABLE IF NOT EXISTS "transactions" (
+     "id" SERIAL PRIMARY KEY,
+     "user_id" INTEGER NOT NULL,
+     "related_entity_type" VARCHAR(32) NOT NULL,
+     "related_entity_id" INTEGER NOT NULL,
+     "type" VARCHAR(8) NOT NULL DEFAULT 'debit',
+     "category" VARCHAR(32) NOT NULL,
+     "description" TEXT NOT NULL,
+     "amount" NUMERIC(12,2) NOT NULL,
+     "currency" CHAR(3) NOT NULL DEFAULT 'EUR',
+     "status" VARCHAR(16) NOT NULL DEFAULT 'completed',
+     "created_at" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_transactions_user_entity ON transactions(user_id, related_entity_type, related_entity_id);
+
 COMMIT;

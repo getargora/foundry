@@ -159,3 +159,37 @@ CREATE TABLE IF NOT EXISTS `invoices` (
   FOREIGN KEY (user_id) REFERENCES users(id),
   FOREIGN KEY (billing_contact_id) REFERENCES users_contact(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `orders` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` INT UNSIGNED NOT NULL,
+  `service_type` VARCHAR(32) NOT NULL,        -- e.g. 'domain', 'hosting', 'ssl', 'product'
+  `service_data` JSON DEFAULT NULL,           -- holds service-specific info like domain name, SKU, etc.
+  `status` ENUM('pending', 'active', 'failed', 'cancelled') NOT NULL DEFAULT 'pending',
+  `amount_due` DECIMAL(12,2) NOT NULL,
+  `currency` CHAR(3) NOT NULL DEFAULT 'EUR',
+  `invoice_id` INT UNSIGNED DEFAULT NULL,
+  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `paid_at` DATETIME(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  INDEX (`user_id`, `service_type`, `status`),
+  CONSTRAINT `orders_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `orders_invoice_fk` FOREIGN KEY (`invoice_id`) REFERENCES `invoices` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `transactions` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` INT UNSIGNED NOT NULL,
+  `related_entity_type` VARCHAR(32) NOT NULL, -- e.g. 'domain', 'hosting', 'subscription', 'order'
+  `related_entity_id` INT UNSIGNED NOT NULL,  -- ID of the related entity
+  `type` ENUM('debit', 'credit') NOT NULL DEFAULT 'debit',
+  `category` VARCHAR(32) NOT NULL,            -- e.g. 'purchase', 'refund', 'top-up', 'charge'
+  `description` TEXT NOT NULL,
+  `amount` DECIMAL(12,2) NOT NULL,
+  `currency` CHAR(3) NOT NULL DEFAULT 'EUR',
+  `status` ENUM('pending', 'completed', 'failed', 'cancelled') NOT NULL DEFAULT 'completed',
+  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  INDEX (`user_id`, `related_entity_type`, `related_entity_id`),
+  CONSTRAINT `transactions_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
