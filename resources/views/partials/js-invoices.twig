@@ -1,0 +1,86 @@
+<script src="/assets/js/tabulator.min.js" defer></script>
+<script src="/assets/js/tabler.min.js" defer></script>
+<script src="/assets/js/jspdf.umd.min.js" defer></script>
+<script src="/assets/js/jspdf.plugin.autotable.min.js" defer></script>
+<script>
+    var table;
+    document.addEventListener("DOMContentLoaded", function(){
+    
+    function invoiceLinkFormatter(cell){
+        var value = cell.getValue();
+        return `<a href="/invoice/${cell.getRow().getData().invoice_number}" style="font-weight:bold;">${value}</a>`;
+    }
+    
+    function actionsFormatter(cell, formatterParams, onRendered) {
+        return `
+            <a class="btn btn-outline-primary btn-icon" href="/invoice/${cell.getRow().getData().invoice_number}" title="View Invoice"><svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></svg></a>
+        `;
+    }
+    
+    table = new Tabulator("#invoicesTable", {
+        ajaxURL:"/api/records/invoices?join=registrar", // Set the URL for your JSON data
+        ajaxConfig:"GET",
+        pagination:"local",
+        paginationSize: 10,
+        paginationSizeSelector:[10, 25, 50, 100],
+        clipboard:true,
+        clipboardPasteAction:"replace",
+        printAsHtml:true,
+        ajaxResponse:function(url, params, response){
+            return response.records;
+        },
+        layout:"fitColumns",
+        responsiveLayout: "collapse",
+        responsiveLayoutCollapseStartOpen:false,
+        resizableColumns:false,
+        initialSort:[
+            {column:"invoice_number", dir:"desc"},
+        ],
+        placeholder: "{{ __('No Data') }}",
+        columns:[
+            {formatter:"responsiveCollapse", width:40, minWidth:40, hozAlign:"center", resizable:false, headerSort:false, responsive:0},
+            {title:"{{ __('Number') }}", field:"invoice_number", minWidth:200, resizable:false, headerSort:true, formatter: invoiceLinkFormatter, responsive:0},
+            {title:"{{ __('Registrar') }}", field:"registrar_id.name", minWidth:300, resizable:false, headerSort:true, responsive:2},
+            {title:"{{ __('Date') }}", field:"issue_date", minWidth:300, resizable:false, headerSort:true, responsive:2},            
+            {title:"{{ __('Amount') }}", field:"total_amount", minWidth:200, resizable:false, headerSort:true, responsive:2, formatter:"money", formatterParams:function(cell){
+                return {
+                    decimal: ".",
+                    thousand: " ",
+                    symbol: (cell.getRow().getData().registrar_id.currency || "$") + " ", // Ensures space after currency symbol
+                    negativeSign: true
+                };
+            }},
+            {title: "{{ __('Actions') }}", formatter: actionsFormatter, headerSort: false, download:false, hozAlign: "center", responsive:0, cellClick:function(e, cell){ e.stopPropagation(); }},
+        ]
+    });
+    var searchInput = document.getElementById("search-input");
+    searchInput.addEventListener("input", function () {
+        var term = searchInput.value.toLowerCase();
+
+        if (term) { // Only apply the filter when there's a term to search for
+            table.setFilter(function (data) {
+                // Check if any of the fields contain the search term
+                return (
+                    String(data.invoice_number).toLowerCase().includes(term) ||
+                    String(data.registrar_id.name).toLowerCase().includes(term) ||
+                    String(data.issue_date).toLowerCase().includes(term) ||
+                    String(data.total_amount).toLowerCase().includes(term)
+                );
+            });
+        } else {
+            table.clearFilter(); // Clear the filter when the search box is emptied
+        }
+    });
+    });
+   
+    function downloadCSV() {
+        table.download("csv", "invoices.csv");
+    }
+    
+    function downloadPDF() {
+        table.download("pdf", "invoices.pdf", {
+            orientation:"portrait",
+            title:"My Invoices"
+        });
+    }
+</script>

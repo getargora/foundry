@@ -179,18 +179,15 @@ class UsersController extends Controller
             }
         }
 
-        $db = $this->container->get('db');
-        $registrars = $db->select("SELECT id, clid, name FROM registrar");
         if ($_SESSION["auth_roles"] != 0) {
-            $registrar = true;
+            $user = true;
         } else {
-            $registrar = null;
+            $user = null;
         }
 
         // Default view for GET requests or if POST data is not set
         return view($response,'admin/users/createUser.twig', [
-            'registrars' => $registrars,
-            'registrar' => $registrar,
+            'user' => $user,
         ]);
     }
 
