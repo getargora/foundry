@@ -7,11 +7,6 @@
    
     document.addEventListener("DOMContentLoaded", function(){
 
-    function emailLinkFormatter(cell){
-        var value = cell.getValue();
-        return `<span style="font-weight:bold;">${value}</a>`;
-    }
-
     function actionsFormatter(cell, formatterParams, onRendered) {
         return `
             <a class="btn btn-outline-primary btn-icon update-btn" href="/user/update/${cell.getRow().getData().username}" title="{{ __('Manage User') }}"><svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1"></path><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z"></path><path d="M16 5l3 3"></path></svg></a> <a class="btn btn-outline-purple btn-icon update-btn" href="/user/impersonate/${cell.getRow().getData().username}" title="{{ __('Impersonate') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 8v-2a2 2 0 0 1 2 -2h7a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-7a2 2 0 0 1 -2 -2v-2" /><path d="M3 12h13l-3 -3" /><path d="M13 15l3 -3" /></svg></a>
@@ -110,7 +105,7 @@
         table.replaceData();
     }
 
-    table = new Tabulator("#userTable", {
+    table = new Tabulator("#orderTable", {
         pagination: true,
         paginationMode: "remote",
         paginationSize: 10,
@@ -124,9 +119,9 @@
 
             // Handle search term
             if (searchTerm) {
-                queryParts.push("filter1=username,cs," + encodeURIComponent(searchTerm));
-                queryParts.push("filter2=email,cs," + encodeURIComponent(searchTerm));
-                queryParts.push("filter3=roles_mask,cs," + encodeURIComponent(searchTerm));
+                queryParts.push("filter1=service_type,cs," + encodeURIComponent(searchTerm));
+                queryParts.push("filter2=status,cs," + encodeURIComponent(searchTerm));
+                queryParts.push("filter3=amount_due,cs," + encodeURIComponent(searchTerm));
             }
 
             // Handle sorting from Tabulator
@@ -167,11 +162,12 @@
         placeholder: "{{ __('No Data') }}",
         columns:[
             {formatter:"responsiveCollapse", width:40, minWidth:40, hozAlign:"center", resizable:false, headerSort:false, responsive:0},
-            {title:"{{ __('Email') }}", field:"email", minWidth:200, resizable:false, headerSort:true, formatter: emailLinkFormatter, responsive:0},
-            {title:"{{ __('User Name') }}", field:"username", width:200, resizable:false, headerSort:true, responsive:2},
-            {title:"{{ __('Roles') }}", field:"roles_mask", width:300, resizable:false, headerSort:true, formatter: roleLabelFormatter, responsive:2},
-            {title:"{{ __('Verified') }}", field:"verified", width:150, resizable:false, headerSort:true, formatter: verifiedFormatter, responsive:2},
-            {title:"{{ __('Status') }}", field:"status", width:200, resizable:false, headerSort:true, formatter: statusBadgeFormatter, responsive:2},
+            {title:"{{ __('ID') }}", field:"id", minWidth:60, resizable:false, headerSort:true, responsive:0},
+            {title:"{{ __('Date') }}", field:"created_at", minWidth:200, resizable:false, headerSort:true, responsive:0},
+            {title:"{{ __('User') }}", field:"user_id", width:100, resizable:false, headerSort:true, responsive:2},
+            {title:"{{ __('Service') }}", field:"service_type", width:250, resizable:false, headerSort:true, formatter: roleLabelFormatter, responsive:2},
+            {title:"{{ __('Status') }}", field:"status", width:150, resizable:false, headerSort:true, formatter: verifiedFormatter, responsive:2},
+            {title:"{{ __('Amount') }}", field:"amount_due", width:100, resizable:false, headerSort:true, formatter: statusBadgeFormatter, responsive:2},
             {title: "{{ __('Actions') }}", formatter: actionsFormatter, responsive:0, headerSort: false, download:false, hozAlign: "center", cellClick:function(e, cell){ e.stopPropagation(); }},
         ]
     });
@@ -187,13 +183,13 @@
     });
 
     function downloadCSV() {
-        table.download("csv", "users.csv");
+        table.download("csv", "orders.csv");
     }
     
     function downloadPDF() {
-        table.download("pdf", "users.pdf", {
+        table.download("pdf", "orders.pdf", {
             orientation:"portrait",
-            title:"My Users"
+            title:"My Orders"
         });
     }
 </script>
