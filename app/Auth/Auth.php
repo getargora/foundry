@@ -360,13 +360,13 @@ class Auth
         $auth = self::$auth;
         try {
             $auth->admin()->logInAsUserById($userId);
-            redirect()->route('home')->with('success','Registrar impersonation started');
+            redirect()->route('home')->with('success','User impersonation started');
         }
         catch (UnknownIdException $e) {
-            redirect()->route('registrars')->with('error','Unknown ID');
+            redirect()->route('listUsers')->with('error','Unknown ID');
         }
         catch (EmailNotVerifiedException $e) {
-            redirect()->route('registrars')->with('error','Email address not verified');
+            redirect()->route('listUsers')->with('error','Email address not verified');
         }
     }
 
@@ -378,7 +378,7 @@ class Auth
         $auth = self::$auth;
         if (self::$auth->isLoggedIn()) {
             $auth->leaveImpersonation();
-            redirect()->route('registrars')->with('success','Left registrar panel successfully');
+            redirect()->route('listUsers')->with('success','Left user account successfully');
         }
         else {
             return false;

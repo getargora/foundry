@@ -113,7 +113,7 @@
                                 {# Display Assigned Roles #}
                                 {% set assigned_roles = [] %}
                                 {% if roles_new['4'] %} 
-                                    {% set assigned_roles = assigned_roles | merge([__('Registrar')]) %}
+                                    {% set assigned_roles = assigned_roles | merge([__('Client')]) %}
                                 {% endif %}
                                 {% if roles_new['8'] %} 
                                     {% set assigned_roles = assigned_roles | merge([__('Accountant')]) %}
@@ -129,11 +129,6 @@
                                 {% endif %}
 
                                 {{ assigned_roles | join(', ') }}
-
-                                {# Show association if the user is associated with another registrar #}
-                                {% if user_asso is defined and user_asso is not null %}
-                                    - {{ __('Associated with Registrar') }} {{ registrar_name }}
-                                {% endif %}
                             {% endif %}
                           </div>
                         </div>
@@ -144,7 +139,7 @@
                         <div class="col-md-6">
                           <div class="mb-3">
                             <label class="form-label">{{ __('Roles') }}</label>
-                            <span class="badge bg-blue-lt">{{ __('Registrar Administrator') }}</span>
+                            <span class="badge bg-blue-lt">{{ __('Client Administrator') }}</span>
                             <input type="hidden" name="roles_mask" value="4">
                           </div>
                         </div>

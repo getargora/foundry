@@ -105,24 +105,11 @@
                           <label class="form-label">{{ __('Type') }}</label>
                           <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="role-toggle" name="role" value="admin">
-                            <label class="form-check-label" for="role-toggle" id="role-label">{{ __('Registrar') }}</label>
+                            <label class="form-check-label" for="role-toggle" id="role-label">{{ __('Client') }}</label>
                           </div>
-                          <!-- Hidden input to ensure "registrar" is sent when the toggle is off -->
-                          <input type="hidden" name="role" id="hidden-role" value="registrar">
+                          <!-- Hidden input to ensure "client" is sent when the toggle is off -->
+                          <input type="hidden" name="role" id="hidden-role" value="client">
                         </div>
-                      </div>
-                    </div>
-
-                    <!-- Registrar-specific fields -->
-                    <div id="registrar-fields" style="display: none;">
-                      <div class="mb-3">
-                        <label class="form-label">{{ __('Registrar Association') }}</label>
-                        <select class="form-select" name="registrar_id">
-                          <option value="" disabled selected>{{ __('Select registrar') }}</option>
-                          {% for registrar in registrars %}
-                            <option value="{{ registrar.id }}">{{ registrar.name }}</option>
-                          {% endfor %}
-                        </select>
                       </div>
                     </div>
                   </div>
@@ -143,21 +130,17 @@
 document.addEventListener("DOMContentLoaded", function () {
     const roleToggle = document.getElementById("role-toggle");
     const hiddenRoleInput = document.getElementById("hidden-role");
-    const registrarFields = document.getElementById("registrar-fields");
     const roleLabel = document.getElementById("role-label");
 
-    // Function to toggle registrar fields, role value, and label text
     function updateRole() {
         if (roleToggle.checked) {
             // Admin role selected
             hiddenRoleInput.value = "admin";
-            roleLabel.textContent = "Admin"; // Update label to Admin
-            registrarFields.style.display = "none"; // Hide registrar-specific fields
+            roleLabel.textContent = "Admin";
         } else {
-            // Registrar role selected
-            hiddenRoleInput.value = "registrar";
-            roleLabel.textContent = "Registrar"; // Update label to Registrar
-            registrarFields.style.display = "block"; // Show registrar-specific fields
+            // Client role selected
+            hiddenRoleInput.value = "client";
+            roleLabel.textContent = "Client";
         }
     }
 
