@@ -35,8 +35,8 @@ class ServicesController extends Controller
         return view($response, 'admin/services/edit.twig', ['id' => $args['id'] ?? null]);
     }
 
-    public function serviceLogs(Request $request, Response $response, array $args): Response
+    public function serviceLogs(Request $request, Response $response): Response
     {
-        return view($response, 'admin/services/logs.twig', ['id' => $args['id'] ?? null]);
+        return view($response, 'admin/services/logs.twig');
     }
 }

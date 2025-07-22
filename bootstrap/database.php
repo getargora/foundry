@@ -46,7 +46,7 @@ try {
 }
 
 // Audit DB (optional)
-try {
+/* try {
     $auditDriver = match ($defaultDriver) {
         'mysql' => "{$config['mysql']['driver']}:dbname=auditDBName;host={$config['mysql']['host']};charset={$config['mysql']['charset']}",
         'sqlite' => "{$config['sqlite']['driver']}:{$config['sqlite']['audit_path']}",
@@ -67,4 +67,4 @@ try {
     $db_audit = PdoDatabase::fromPdo($pdo_audit);
 } catch (PDOException $e) {
     $log->alert("Audit database connection failed: " . $e->getMessage(), ['driver' => 'audit']);
-}
+} */
