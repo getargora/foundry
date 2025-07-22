@@ -18,6 +18,8 @@ use App\Controllers\ProfileController;
 use App\Controllers\UsersController;
 use App\Controllers\FinancialsController;
 use App\Controllers\OrdersController;
+use App\Controllers\ServicesController;
+use App\Controllers\ProvidersController;
 use App\Controllers\SupportController;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\GuestMiddleware;
@@ -35,7 +37,7 @@ $app->group('', function ($route) {
     $route->get('/login', AuthController::class . ':createLogin')->setName('login');
     $route->map(['GET', 'POST'], '/login/verify', AuthController::class . ':verify2FA')->setName('verify2FA');
     $route->post('/login', AuthController::class . ':login');
-    
+
     $route->post('/webauthn/login/challenge', AuthController::class . ':getLoginChallenge')->setName('webauthn.login.challenge');
     $route->post('/webauthn/login/verify', AuthController::class . ':verifyLogin')->setName('webauthn.login.verify');
 
@@ -53,19 +55,30 @@ $app->group('', function ($route) {
 
 $app->group('', function ($route) {
     $route->get('/dashboard', HomeController::class .':dashboard')->setName('home');
-    
+
     $route->get('/users', UsersController::class .':listUsers')->setName('listUsers');
     $route->map(['GET', 'POST'], '/user/create', UsersController::class . ':createUser')->setName('createUser');
     $route->get('/user/update/{user}', UsersController::class . ':updateUser')->setName('updateUser');
     $route->post('/user/update', UsersController::class . ':updateUserProcess')->setName('updateUserProcess');
     $route->get('/user/impersonate/{user}', UsersController::class . ':impersonateUser')->setName('impersonateUser');
     $route->get('/leave_impersonation', UsersController::class . ':leave_impersonation')->setName('leave_impersonation');
-    
+
     $route->get('/orders', OrdersController::class .':listOrders')->setName('listOrders');
     $route->get('/orders/view', OrdersController::class .':viewOrder')->setName('viewOrder');
     $route->get('/orders/create', OrdersController::class .':createOrder')->setName('createOrder');
     $route->get('/orders/edit', OrdersController::class .':editOrder')->setName('editOrder');
     $route->get('/orders/delete', OrdersController::class .':deleteOrder')->setName('deleteOrder');
+
+    $route->get('/services', ServicesController::class .':listServices')->setName('listServices');
+    $route->get('/services/view', ServicesController::class .':viewService')->setName('viewService');
+    $route->get('/services/edit', ServicesController::class .':editService')->setName('editService');
+    $route->get('/service-logs', ServicesController::class .':serviceLogs')->setName('serviceLogs');
+
+    $route->get('/providers', ProvidersController::class .':listProviders')->setName('listProviders');
+    $route->get('/providers/view', ProvidersController::class .':viewProvider')->setName('viewProvider');
+    $route->get('/providers/create', ProvidersController::class .':createProvider')->setName('createProvider');
+    $route->get('/providers/edit', ProvidersController::class .':editProvider')->setName('editProvider');
+    $route->get('/providers/delete', ProvidersController::class .':deleteProvider')->setName('deleteProvider');
 
     $route->get('/invoices', FinancialsController::class .':invoices')->setName('invoices');
     $route->get('/invoice/{invoice}', FinancialsController::class . ':viewInvoice')->setName('viewInvoice');
@@ -99,7 +112,7 @@ $app->group('', function ($route) {
     $route->get('/webauthn/register/challenge', ProfileController::class . ':getRegistrationChallenge')->setName('webauthn.register.challenge');
     $route->post('/webauthn/register/verify', ProfileController::class . ':verifyRegistration')->setName('webauthn.register.verify');
     $route->post('/token-well', ProfileController::class .':tokenWell')->setName('tokenWell');
-    
+
     $route->get('/mode', HomeController::class .':mode')->setName('mode');
     $route->post('/theme', HomeController::class . ':selectTheme')->setName('select.theme');
     $route->get('/lang', HomeController::class .':lang')->setName('lang');
