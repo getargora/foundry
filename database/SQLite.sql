@@ -191,3 +191,47 @@ CREATE TABLE "transactions" (
 );
 
 CREATE INDEX idx_transactions_user_entity ON transactions(user_id, related_entity_type, related_entity_id);
+
+CREATE TABLE "providers" (
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "name" TEXT NOT NULL UNIQUE,
+    "type" TEXT NOT NULL DEFAULT 'custom',
+    "api_endpoint" TEXT,
+    "credentials" TEXT,
+    "status" TEXT NOT NULL DEFAULT 'active',
+    "created_at" TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE "services" (
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "user_id" INTEGER NOT NULL,
+    "provider_id" INTEGER,
+    "order_id" INTEGER,
+    "type" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'active',
+    "config" TEXT DEFAULT NULL,
+    "registered_at" TEXT,
+    "expires_at" TEXT,
+    "updated_at" TEXT DEFAULT CURRENT_TIMESTAMP,
+    "created_at" TEXT DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE SET NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL
+);
+
+CREATE INDEX idx_services_user_type_status ON services(user_id, type, status);
+
+CREATE TABLE "service_logs" (
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "service_id" INTEGER NOT NULL,
+    "event" TEXT NOT NULL,
+    "actor_type" TEXT NOT NULL DEFAULT 'system',
+    "actor_id" INTEGER,
+    "details" TEXT DEFAULT NULL,
+    "created_at" TEXT DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_service_logs_service_event ON service_logs(service_id, event);

@@ -190,4 +190,48 @@ CREATE TABLE IF NOT EXISTS "transactions" (
 
 CREATE INDEX idx_transactions_user_entity ON transactions(user_id, related_entity_type, related_entity_id);
 
+CREATE TABLE IF NOT EXISTS "providers" (
+     "id" SERIAL PRIMARY KEY,
+     "name" VARCHAR(64) NOT NULL UNIQUE,
+     "type" VARCHAR(16) NOT NULL DEFAULT 'custom',
+     "api_endpoint" VARCHAR(255),
+     "credentials" JSONB,
+     "status" VARCHAR(16) NOT NULL DEFAULT 'active',
+     "created_at" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS "services" (
+     "id" SERIAL PRIMARY KEY,
+     "user_id" INTEGER NOT NULL,
+     "provider_id" INTEGER,
+     "order_id" INTEGER,
+     "type" VARCHAR(32) NOT NULL,
+     "status" VARCHAR(16) NOT NULL DEFAULT 'active',
+     "config" JSONB DEFAULT NULL,
+     "registered_at" TIMESTAMP(3),
+     "expires_at" TIMESTAMP(3),
+     "updated_at" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+     "created_at" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (provider_id) REFERENCES providers(id) ON DELETE SET NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL
+);
+
+CREATE INDEX idx_services_user_type_status ON services(user_id, type, status);
+
+CREATE TABLE IF NOT EXISTS "service_logs" (
+     "id" SERIAL PRIMARY KEY,
+     "service_id" INTEGER NOT NULL,
+     "event" VARCHAR(64) NOT NULL,
+     "actor_type" VARCHAR(16) NOT NULL DEFAULT 'system',
+     "actor_id" INTEGER,
+     "details" TEXT,
+     "created_at" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_service_logs_service_event ON service_logs(service_id, event);
+
 COMMIT;

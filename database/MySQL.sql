@@ -193,3 +193,47 @@ CREATE TABLE IF NOT EXISTS `transactions` (
   INDEX (`user_id`, `related_entity_type`, `related_entity_id`),
   CONSTRAINT `transactions_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `providers` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(64) NOT NULL,                          -- e.g. 'Vultr', 'OpenSRS', 'InternalDNS'
+  `type` ENUM('domain', 'hosting', 'email', 'api', 'custom') NOT NULL DEFAULT 'custom',
+  `api_endpoint` VARCHAR(255) DEFAULT NULL,
+  `credentials` JSON DEFAULT NULL,                      -- e.g. API keys, tokens
+  `status` ENUM('active', 'inactive', 'testing') NOT NULL DEFAULT 'active',
+  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `services` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` INT UNSIGNED NOT NULL,
+  `provider_id` INT UNSIGNED DEFAULT NULL,              -- FK to provider
+  `order_id` INT UNSIGNED DEFAULT NULL,                 -- FK to original order
+  `type` VARCHAR(32) NOT NULL,                          -- e.g. 'domain', 'vps', 'ssl', 'mail'
+  `status` ENUM('active', 'suspended', 'terminated', 'expired', 'pending') NOT NULL DEFAULT 'active',
+  `config` JSON DEFAULT NULL,                           -- full config: e.g. domain contacts, NS, VPS specs
+  `registered_at` DATETIME(3) DEFAULT NULL,             -- when the resource was created
+  `expires_at` DATETIME(3) DEFAULT NULL,                -- when it ends
+  `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  INDEX (`user_id`, `type`, `status`),
+  CONSTRAINT `services_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `services_provider_fk` FOREIGN KEY (`provider_id`) REFERENCES `providers` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `services_order_fk` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `service_logs` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `service_id` INT UNSIGNED NOT NULL,
+  `event` VARCHAR(64) NOT NULL,                         -- e.g. 'provisioned', 'suspended', 'dns_updated'
+  `actor_type` ENUM('system', 'user', 'admin') NOT NULL DEFAULT 'system',
+  `actor_id` INT UNSIGNED DEFAULT NULL,                 -- optional: who triggered the event
+  `details` TEXT DEFAULT NULL,                          -- optional JSON string or free text
+  `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  INDEX (`service_id`, `event`),
+  CONSTRAINT `service_logs_service_fk` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
