@@ -32,7 +32,17 @@ class OrdersController extends Controller
 
     public function createOrder(Request $request, Response $response): Response
     {
-        return view($response, 'admin/orders/create.twig');
+        $db = $this->container->get('db');
+        $providers = $db->select("SELECT id, name, type, api_endpoint, credentials, pricing FROM providers WHERE status = 'active'");
+
+        foreach ($providers as &$provider) {
+            $provider['products'] = json_decode($provider['pricing'], true) ?? [];
+        }
+
+        return $this->container->get('view')->render($response, 'admin/orders/create.twig', [
+            'providers' => $providers,
+            'user' => $_SESSION['auth_user_id'] ?? null
+        ]);
     }
 
     public function editOrder(Request $request, Response $response, array $args): Response

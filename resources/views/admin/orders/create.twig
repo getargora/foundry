@@ -1,1 +1,210 @@
-<h1>Orders - create</h1>
+{% extends "layouts/app.twig" %}
+
+{% block title %}{{ __('Create New Order') }}{% endblock %}
+
+{% block content %}
+<style>
+  .card.cursor-pointer:hover {
+    border-color: #206bc4;
+    box-shadow: 0 0 0 2px rgba(32, 107, 196, 0.25);
+  }
+</style>
+      <div class="page-wrapper">
+        <!-- Page header -->
+        <div class="page-header d-print-none">
+          <div class="container-xl">
+            <div class="row g-2 align-items-center">
+              <div class="col">
+                <div class="mb-1">
+                  <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                      <a href="{{route('home')}}"><svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><polyline points="5 12 3 12 12 3 21 12 19 12" /><path d="M5 12v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-8" /><rect x="10" y="12" width="4" height="4" /></svg></a>
+                    </li>
+                    <li class="breadcrumb-item">
+                      <a href="{{route('listOrders')}}">{{ __('Orders') }}</a>
+                    </li>
+                    <li class="breadcrumb-item active">
+                      {{ __('Create New Order') }}
+                    </li>
+                  </ol>
+                </div>
+                <h2 class="page-title">
+                  {{ __('Create New Order') }}
+                </h2>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Page body -->
+        <div class="page-body">
+          <div class="container-xl">
+            <div class="col-12">
+            {% include 'partials/flash.twig' %}
+              <div class="card">
+                <div class="card-body">
+                  <form method="post" action="{{route('createOrder')}}" id="createOrderForm">
+                  {{ csrf.field | raw }}
+
+                    <div class="row">
+                      {% for provider in providers %}
+                        {% for code, product in provider.products %}
+                          <div class="col-md-4 mb-4">
+                            {% set safe_id = 'card-' ~ provider.id ~ '-' ~ code|replace({'.': '-', ':': '-'}) %}
+                            <label class="card h-100 cursor-pointer position-relative" id="{{ safe_id }}" onclick="selectProduct('{{ provider.id }}', '{{ code }}', '{{ safe_id }}')">
+                              <input type="radio" name="product_choice" class="form-check-input position-absolute top-0 end-0 m-3 z-index-3" value="{{ provider.id }}::{{ code }}" required>
+                              <div class="card-status-start bg-primary d-none"></div>
+                              <div class="card-body">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                  <span class="badge bg-blue text-blue-fg">€{{ product.price }}/{{ product.billing }}</span>
+                                </div>
+                                <h4 class="card-title mb-0">{{ product.label }}</h4>
+                                <p class="text-muted small mb-2">{{ provider.name }} — {{ product.description }}</p>
+                                <div class="text-end">
+                                  <span class="badge bg-light text-light-fg">Click to configure</span>
+                                </div>
+                              </div>
+                            </label>
+                          </div>
+                        {% endfor %}
+                      {% endfor %}
+                    </div>
+
+                    <div id="productFields" class="mt-4 d-none">
+                      <h4>Service Details</h4>
+                      <div id="dynamicFields" class="row g-3"></div>
+                    </div>
+
+                    <div id="extraFields" class="mt-4 d-none">
+                        <h4>Additional Configuration</h4>
+                      <div class="row g-3" id="extraDynamicFields">
+                        <!-- Dynamic domain/contact fields here -->
+                      </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                  <div class="row align-items-center">
+                    <div class="col-auto">
+                      <button type="submit" class="btn btn-primary">{{ __('Create Order') }}</button></form>
+                    </div>
+                  </div>
+                </div>
+            </div>
+          </div>
+        </div>
+        {% include 'partials/footer.twig' %}
+      </div>
+<script>
+const productData = {{ providers|json_encode|raw }};
+
+function selectProduct(providerId, productCode, cardId) {
+  document.querySelectorAll('.card .card-status-start').forEach(el => el.classList.add('d-none'));
+
+  const selectedCard = document.getElementById(cardId);
+  if (selectedCard) {
+    const statusEl = selectedCard.querySelector('.card-status-start');
+    if (statusEl) statusEl.classList.remove('d-none');
+  }
+
+  document.querySelectorAll('input[name="product_choice"]').forEach(r => r.checked = false);
+  const inputEl = document.querySelector(`input[value="${providerId}::${productCode}"]`);
+  if (inputEl) inputEl.checked = true;
+
+  const provider = productData.find(p => p.id == providerId);
+  const product = provider.products[productCode];
+
+  const fieldContainer = document.getElementById('dynamicFields');
+  fieldContainer.innerHTML = '';
+  (product.fields || []).forEach(field => {
+    fieldContainer.innerHTML += `
+      <div class="col-md-6">
+        <label class="form-label">${field.label}</label>
+        <input type="text" name="config[${field.name}]" class="form-control" placeholder="${field.placeholder || ''}" ${field.required ? 'required' : ''}>
+      </div>`;
+  });
+
+  document.getElementById('productFields').classList.remove('d-none');
+
+  const extra = document.getElementById('extraDynamicFields');
+  if (product.type === 'domain') {
+    extra.innerHTML = `
+      <div class="col-md-8">
+        <label class="form-label">Domain Name</label>
+        <div class="input-group">
+          <input type="text" name="config[domain]" class="form-control" placeholder="yourname">
+          <span class="input-group-text">.com</span>
+        </div>
+        <small class="form-hint">Enter the domain name without TLD.</small>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Registration Period</label>
+        <select name="config[years]" class="form-select" required>
+          ${[...Array(10)].map((_, i) => `<option value="${i + 1}">${i + 1} year(s)</option>`).join('')}
+        </select>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Nameservers</label>
+        <div class="row g-2">
+          <div class="col-md-4"><input type="text" class="form-control" name="config[nameservers][]" placeholder="ns1.example.com" required></div>
+          <div class="col-md-4"><input type="text" class="form-control" name="config[nameservers][]" placeholder="ns2.example.com" required></div>
+          <div class="col-md-4"><input type="text" class="form-control" name="config[nameservers][]" placeholder="ns3.example.com (optional)"></div>
+        </div>
+      </div>
+
+      <div class="col-12 mt-4">
+        <label class="form-label">Registrant Contact</label>
+        <div class="form-selectgroup">
+          <label class="form-selectgroup-item">
+            <input type="radio" name="contact_mode" value="default" class="form-selectgroup-input" checked onchange="toggleContactFields(false)">
+            <span class="form-selectgroup-label">Use Default Contact</span>
+          </label>
+          <label class="form-selectgroup-item">
+            <input type="radio" name="contact_mode" value="custom" class="form-selectgroup-input" onchange="toggleContactFields(true)">
+            <span class="form-selectgroup-label">Enter New Contact</span>
+          </label>
+        </div>
+      </div>
+
+      <div id="contactFields" class="row g-3 mt-3 d-none">
+        <div class="col-md-6">
+          <label class="form-label">Full Name</label>
+          <input type="text" name="config[contact][name]" class="form-control">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Email</label>
+          <input type="email" name="config[contact][email]" class="form-control">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Organization (optional)</label>
+          <input type="text" name="config[contact][org]" class="form-control">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Phone</label>
+          <input type="text" name="config[contact][phone]" class="form-control" placeholder="+1.1234567890">
+        </div>
+        <div class="col-12">
+          <label class="form-label">Address</label>
+          <input type="text" name="config[contact][address]" class="form-control" placeholder="Street, City, Country">
+        </div>
+      </div>
+    `;
+    document.getElementById('extraFields').classList.remove('d-none');
+  } else {
+    extra.innerHTML = '';
+    document.getElementById('extraFields').classList.add('d-none');
+  }
+}
+
+function toggleContactFields(show) {
+  const el = document.getElementById('contactFields');
+  if (el) {
+    if (show) {
+      el.classList.remove('d-none');
+    } else {
+      el.classList.add('d-none');
+    }
+  }
+}
+</script>
+{% endblock %}
