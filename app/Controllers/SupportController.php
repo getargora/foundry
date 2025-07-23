@@ -75,11 +75,10 @@ class SupportController extends Controller
                 
                 $link = envi('APP_URL').'/ticket/'.$ticket_id;
                 $email = $db->selectValue('SELECT email FROM users WHERE id = ?', [$_SESSION['auth_user_id']]);
-                $registry = $db->selectValue('SELECT value FROM settings WHERE name = ?', ['company_name']);
                 $crdate = $currentDateTime->format('Y-m-d H:i:s.v');
                 $message = file_get_contents(__DIR__.'/../../resources/views/mail/ticket.html');
-                $placeholders = ['{registry}', '{link}', '{app_name}', '{app_url}', '{crdate}', '{ticket_id}', '{subject}'];
-                $replacements = [$registry, $link, envi('APP_NAME'), envi('APP_URL'), $crdate, $ticket_id, $subject];
+                $placeholders = ['{link}', '{app_name}', '{app_url}', '{crdate}', '{ticket_id}', '{subject}'];
+                $replacements = [$link, envi('APP_NAME'), envi('APP_URL'), $crdate, $ticket_id, $subject];
                 $message = str_replace($placeholders, $replacements, $message);            
                 $mailsubject = '[' . envi('APP_NAME') . '] New Support Ticket Created';
                 $from = ['email'=>envi('MAIL_FROM_ADDRESS'), 'name'=>envi('MAIL_FROM_NAME')];
@@ -224,14 +223,13 @@ class SupportController extends Controller
 
                 $link = envi('APP_URL').'/ticket/'.$ticket_id;
                 $email = $db->selectValue('SELECT email FROM users WHERE id = ?', [$_SESSION['auth_user_id']]);
-                $registry = $db->selectValue('SELECT value FROM settings WHERE name = ?', ['company_name']);
                 $responseBrief = mb_substr($responseText, 0, 100);
                 if (mb_strlen($responseText) > 100) {
                     $responseBrief .= "...";
                 }
                 $message = file_get_contents(__DIR__.'/../../resources/views/mail/ticket-reply.html');
-                $placeholders = ['{registry}', '{link}', '{app_name}', '{app_url}', '{latest}', '{ticket_id}'];
-                $replacements = [$registry, $link, envi('APP_NAME'), envi('APP_URL'), $responseBrief, $ticket_id];
+                $placeholders = ['{link}', '{app_name}', '{app_url}', '{latest}', '{ticket_id}'];
+                $replacements = [$link, envi('APP_NAME'), envi('APP_URL'), $responseBrief, $ticket_id];
                 $message = str_replace($placeholders, $replacements, $message);            
                 $mailsubject = '[' . envi('APP_NAME') . '] Update on Your Support Ticket';
                 $from = ['email'=>envi('MAIL_FROM_ADDRESS'), 'name'=>envi('MAIL_FROM_NAME')];
