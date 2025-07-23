@@ -103,10 +103,6 @@ $app->group('', function ($route) {
     $route->post('/support/status', SupportController::class . ':statusTicket')->setName('statusTicket');
 
     $route->get('/profile', ProfileController::class .':profile')->setName('profile');
-    $route->get('/profile/notifications', ProfileController::class .':notifications')->setName('notifications');
-    $route->get('/profile/security', ProfileController::class .':security')->setName('security');
-    $route->get('/profile/plans', ProfileController::class .':plans')->setName('plans');
-    $route->get('/profile/invoices', ProfileController::class .':invoices')->setName('invoices');
     $route->post('/profile/2fa', ProfileController::class .':activate2fa')->setName('activate2fa');
     $route->post('/profile/logout-everywhere', ProfileController::class . ':logoutEverywhereElse')->setName('profile.logout.everywhere');
     $route->get('/webauthn/register/challenge', ProfileController::class . ':getRegistrationChallenge')->setName('webauthn.register.challenge');
