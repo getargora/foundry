@@ -49,6 +49,14 @@ class ProvidersController extends Controller
             }
             $credentials = json_encode($credentials);
 
+            $pricing_raw = $data['pricing'] ?? '{}';
+            $pricing = json_decode($pricing_raw, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->container->get('flash')->addMessage('error', 'Invalid JSON in pricing');
+                return $response->withHeader('Location', '/provider/create')->withStatus(302);
+            }
+            $pricing = json_encode($pricing);
+
             $status = in_array($data['status'] ?? '', ['active', 'inactive', 'testing']) ? $data['status'] : 'active';
 
             try {
@@ -61,6 +69,7 @@ class ProvidersController extends Controller
                         'type' => $type,
                         'api_endpoint' => $api_connection,
                         'credentials' => $credentials,
+                        'pricing' => $pricing,
                         'status' => $status,
                         'created_at' => $created_at
                     ]

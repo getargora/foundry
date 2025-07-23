@@ -203,6 +203,7 @@ CREATE TABLE IF NOT EXISTS `providers` (
   `type` ENUM('domain', 'hosting', 'email', 'api', 'custom') NOT NULL DEFAULT 'custom',
   `api_endpoint` VARCHAR(255) DEFAULT NULL,
   `credentials` JSON DEFAULT NULL,                      -- e.g. API keys, tokens
+  `pricing` JSON DEFAULT NULL,
   `status` ENUM('active', 'inactive', 'testing') NOT NULL DEFAULT 'active',
   `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),

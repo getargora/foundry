@@ -199,6 +199,7 @@ CREATE TABLE IF NOT EXISTS "providers" (
      "type" VARCHAR(16) NOT NULL DEFAULT 'custom',
      "api_endpoint" VARCHAR(255),
      "credentials" JSONB,
+     "pricing" JSONB,
      "status" VARCHAR(16) NOT NULL DEFAULT 'active',
      "created_at" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP
 );

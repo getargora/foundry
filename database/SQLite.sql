@@ -201,6 +201,7 @@ CREATE TABLE "providers" (
     "type" TEXT NOT NULL DEFAULT 'custom',
     "api_endpoint" TEXT,
     "credentials" TEXT,
+    "pricing" TEXT,
     "status" TEXT NOT NULL DEFAULT 'active',
     "created_at" TEXT DEFAULT CURRENT_TIMESTAMP
 );
