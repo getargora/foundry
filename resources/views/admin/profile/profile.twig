@@ -17,6 +17,11 @@
                   {{ __('My Profile') }}
                 </h2>
               </div>
+              <div class="col-auto ms-auto d-print-none">
+                <span class="badge bg-success text-success-fg">
+                  {{ __('Balance') }}: {{ balance.account_balance|number_format(2) }} {{ balance.currency }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
