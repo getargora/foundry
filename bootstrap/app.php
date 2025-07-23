@@ -189,16 +189,16 @@ $container->set('view', function ($container) {
         return false;
     }));
 
-    // Fetch registrar currency and registry default currency
-    // TODO - redo for generic case and add currency per user
+    // Fetch user currency
     $db = $container->get('db');
-    $user_data = "SELECT * FROM users WHERE id = ? LIMIT 1";
 
-    // Ensure currency is set (last fallback to 'EUR')
-    $currency = $_SESSION['_currency'] ?? 'EUR';
+    if (isset($_SESSION['auth_user_id'])) {
+        $user_data = $db->selectRow("SELECT id, currency FROM users WHERE id = ? LIMIT 1", [$_SESSION['auth_user_id']]);
+        $_SESSION['_currency'] = $user_data['currency'] ?? 'EUR';
+    }
 
     // Make it accessible in templates
-    $view->getEnvironment()->addGlobal('currency', $currency);
+    $view->getEnvironment()->addGlobal('currency', $_SESSION['_currency']);
 
     // Check if the user is impersonated from the admin, otherwise default to false
     $isAdminImpersonation = isset($_SESSION['impersonator']) ? $_SESSION['impersonator'] : false;

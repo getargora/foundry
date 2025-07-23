@@ -16,7 +16,10 @@ CREATE TABLE IF NOT EXISTS "users" (
     "tfa_enabled" BOOLEAN DEFAULT false,
     "auth_method" VARCHAR(255) DEFAULT 'password',
     "backup_codes" TEXT,
-    "password_last_updated" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    "password_last_updated" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "currency" CHAR(3) NOT NULL DEFAULT 'EUR',
+    "account_balance" NUMERIC(12,2) NOT NULL DEFAULT 0.00,
+    "credit_limit" NUMERIC(12,2) NOT NULL DEFAULT 0.00
 );
 
 CREATE TABLE IF NOT EXISTS "users_audit" (

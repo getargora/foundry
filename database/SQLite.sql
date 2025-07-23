@@ -17,6 +17,9 @@ CREATE TABLE "users" (
     "auth_method" VARCHAR(10) NOT NULL DEFAULT 'password' CHECK(auth_method IN ('password','2fa','webauthn')),
     "backup_codes" TEXT,
     "password_last_updated" DATETIME DEFAULT CURRENT_TIMESTAMP,
+    "currency" TEXT NOT NULL DEFAULT 'EUR',
+    "account_balance" REAL NOT NULL DEFAULT 0.0,
+    "credit_limit" REAL NOT NULL DEFAULT 0.0,
     CONSTRAINT "email" UNIQUE ("email")
 );
 

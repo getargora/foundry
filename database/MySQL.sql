@@ -15,6 +15,9 @@ CREATE TABLE IF NOT EXISTS `users` (
   `auth_method` ENUM('password', '2fa', 'webauthn') DEFAULT 'password',
   `backup_codes` TEXT,
   `password_last_updated` timestamp NULL DEFAULT current_timestamp(),
+  `currency` CHAR(3) NOT NULL DEFAULT 'EUR',
+  `account_balance` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  `credit_limit` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

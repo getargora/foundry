@@ -166,18 +166,18 @@ class FinancialsController extends Controller
         ]);
 
     }
-    
+
     public function deposit(Request $request, Response $response)
     {
         if ($_SESSION["auth_roles"] != 0) {
             $db = $this->container->get('db');
-            $balance = $db->selectRow('SELECT name, accountBalance, creditLimit FROM registrar WHERE id = ?',
-            [ $_SESSION["auth_registrar_id"] ]
+            $balance = $db->selectRow('SELECT username, account_balance, credit_limit FROM users WHERE id = ?',
+            [ $_SESSION["auth_user_id"] ]
             );
             $currency = $_SESSION['_currency'];
             $stripe_key = envi('STRIPE_PUBLISHABLE_KEY');
 
-            return view($response,'admin/financials/deposit-registrar.twig', [
+            return view($response,'admin/financials/deposit-user.twig', [
                 'balance' => $balance,
                 'currency' => $currency,
                 'stripe_key' => $stripe_key
@@ -188,7 +188,7 @@ class FinancialsController extends Controller
             // Retrieve POST data
             $data = $request->getParsedBody();
             $db = $this->container->get('db');
-            $registrar_id = $data['registrar'];
+            $user_id = $data['user'];
             $amount = $data['amount'];
             $description = "funds added to account balance";
             if (!empty($data['description'])) {
@@ -204,34 +204,26 @@ class FinancialsController extends Controller
                     $currentDateTime = new \DateTime();
                     $date = $currentDateTime->format('Y-m-d H:i:s.v');
                     $db->insert(
-                        'statement',
+                        'transactions',
                         [
-                            'registrar_id' => $registrar_id,
-                            'date' => $date,
-                            'command' => 'create',
-                            'domain_name' => 'deposit',
-                            'length_in_months' => 0,
-                            'fromS' => $date,
-                            'toS' => $date,
-                            'amount' => $amount
+                            'user_id' => $user_id,
+                            'related_entity_type' => $user_id,
+                            'related_entity_id' => $user_id,
+                            'type' => 'credit',
+                            'category' => 'deposit',
+                            'description' => $description,
+                            'amount' => $amount,
+                            'currency' => $_SESSION['_currency'],
+                            'status' => 'completed',
+                            'created_at' => $date
                         ]
                     );
 
-                    $db->insert(
-                        'payment_history',
-                        [
-                            'registrar_id' => $registrar_id,
-                            'date' => $date,
-                            'description' => $description,
-                            'amount' => $amount
-                        ]
-                    );
-                    
                     $db->exec(
-                        'UPDATE registrar SET accountBalance = (accountBalance + ?) WHERE id = ?',
+                        'UPDATE users SET account_balance = (account_balance + ?) WHERE id = ?',
                         [
                             $amount,
-                            $registrar_id
+                            $user_id
                         ]
                     );
                     
@@ -242,7 +234,7 @@ class FinancialsController extends Controller
                     return $response->withHeader('Location', '/deposit')->withStatus(302);
                 }
                 
-                $this->container->get('flash')->addMessage('success', 'Deposit successfully added. The registrar\'s account balance has been updated.');
+                $this->container->get('flash')->addMessage('success', 'Deposit successfully added. The user\'s account balance has been updated.');
                 return $response->withHeader('Location', '/deposit')->withStatus(302);
             } else {
                 $this->container->get('flash')->addMessage('error', 'Invalid entry: Deposit amount must be positive. Please enter a valid amount.');
@@ -251,10 +243,10 @@ class FinancialsController extends Controller
         }
             
         $db = $this->container->get('db');
-        $registrars = $db->select("SELECT id, clid, name FROM registrar");
+        $users = $db->select("SELECT id, email, username FROM users");
 
         return view($response,'admin/financials/deposit.twig', [
-            'registrars' => $registrars
+            'users' => $users
         ]);
     }
     
@@ -276,7 +268,7 @@ class FinancialsController extends Controller
                 'price_data' => [
                     'currency' => $_SESSION['_currency'],
                     'product_data' => [
-                        'name' => 'Registrar Balance Deposit',
+                        'name' => 'Client Balance Deposit',
                     ],
                     'unit_amount' => $amountInCents,
                 ],
@@ -333,11 +325,10 @@ class FinancialsController extends Controller
     public function createCryptoPayment(Request $request, Response $response)
     {
         $postData = $request->getParsedBody();
-        $amount = $postData['amount']; // Make sure to validate and sanitize this amount
+        $amount = $postData['amount'];
 
-        // Your registrar ID and unique identifier
         $registrarId = $_SESSION['auth_registrar_id'];
-        $uniqueIdentifier = Uuid::uuid4()->toString(); // Generates a unique UUID
+        $uniqueIdentifier = Uuid::uuid4()->toString();
 
         $delimiter = '|';
         $combinedString = $registrarId . $delimiter . $uniqueIdentifier;

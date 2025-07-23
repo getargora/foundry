@@ -1,6 +1,6 @@
 {% extends "layouts/app.twig" %}
 
-{% block title %}{{ __('Registrar Deposit') }}{% endblock %}
+{% block title %}{{ __('User Deposit') }}{% endblock %}
 
 {% block content %}
       <div class="page-wrapper">
@@ -14,7 +14,7 @@
                   {{ __('Overview') }}
                 </div>
                 <h2 class="page-title">
-                  {{ __('Registrar Deposit') }}
+                  {{ __('User Deposit') }}
                 </h2>
               </div>
             </div>
@@ -30,17 +30,17 @@
                   <form id="depositForm" action="/deposit" method="post">
                   {{ csrf.field | raw }}
                     <div class="mb-3">
-                        <label for="registrarSelect" class="form-label required">{{ __('Registrar') }}</label>
-                        <select class="form-select" id="registrarSelect" name="registrar" required>
-                                <option selected disabled value="">{{ __('Choose Registrar...') }}</option>
-                            {% for registrar in registrars %}
-                                <option value="{{ registrar.id }}">{{ registrar.name }}</option>
+                        <label for="userSelect" class="form-label required">{{ __('User') }}</label>
+                        <select class="form-select" id="userSelect" name="user" required>
+                                <option selected disabled value="">{{ __('Choose User...') }}</option>
+                            {% for user in users %}
+                                <option value="{{ user.id }}">{{ user.username }}</option>
                             {% endfor %}
                         </select>
                     </div>
 
                     <div class="deposit-info">
-                        <h5>{{ __('Current Balance for') }} <span id="registrarName"></span></h5>
+                        <h5>{{ __('Current Balance for') }} <span id="userName"></span></h5>
                         <p class="fs-4"><span id="currentFunds">0.00</span></p>
                     </div>
 
@@ -70,21 +70,21 @@
         {% include 'partials/footer.twig' %}
       </div>
 <script>
-const registrarSelect = document.getElementById('registrarSelect');
-registrarSelect.addEventListener('change', function() {
-    const selectedRegistrarId = registrarSelect.value;
+const userSelect = document.getElementById('userSelect');
+userSelect.addEventListener('change', function() {
+    const selectedUserId = userSelect.value;
 
-    // API call to get registrar details
-    fetch(`/api/records/registrar`)
+    // API call to get user details
+    fetch(`/api/records/users`)
     .then(response => response.json())
     .then(data => {
-        const registrarData = data.records.find(registrar => registrar.id == selectedRegistrarId);
+        const userData = data.records.find(users => users.id == selectedUserId);
         
-        if (registrarData) {
-            document.getElementById('registrarName').textContent = registrarData.name;
-            document.getElementById('currentFunds').textContent = `${registrarData.currency} ${parseFloat(registrarData.accountBalance).toFixed(2)}`;
+        if (userData) {
+            document.getElementById('userName').textContent = userData.username;
+            document.getElementById('currentFunds').textContent = `${userData.currency} ${parseFloat(userData.account_balance).toFixed(2)}`;
         } else {
-            document.getElementById('registrarName').textContent = 'N/A';
+            document.getElementById('userName').textContent = 'N/A';
             document.getElementById('currentFunds').textContent = '0.00';
         }
 
