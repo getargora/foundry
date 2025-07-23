@@ -76,7 +76,7 @@ $app->group('', function ($route) {
 
     $route->get('/providers', ProvidersController::class .':listProviders')->setName('listProviders');
     $route->get('/providers/view', ProvidersController::class .':viewProvider')->setName('viewProvider');
-    $route->get('/providers/create', ProvidersController::class .':createProvider')->setName('createProvider');
+    $route->map(['GET', 'POST'], '/provider/create', ProvidersController::class . ':createProvider')->setName('createProvider');
     $route->get('/providers/edit', ProvidersController::class .':editProvider')->setName('editProvider');
     $route->get('/providers/delete', ProvidersController::class .':deleteProvider')->setName('deleteProvider');
 

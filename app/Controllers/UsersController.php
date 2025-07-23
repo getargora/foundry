@@ -124,7 +124,6 @@ class UsersController extends Controller
                     $this->container->get('flash')->addMessage('success', 'User ' . $email . ' has been created successfully');
                     return $response->withHeader('Location', '/users')->withStatus(302);
                 } catch (Exception $e) {
-                    $db->rollBack();
                     $this->container->get('flash')->addMessage('error', 'Database failure: ' . $e->getMessage());
                     return $response->withHeader('Location', '/user/create')->withStatus(302);
                 }        
