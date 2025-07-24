@@ -17,7 +17,6 @@
         "twig",
         "template",
         "orm",
-        "argon",
         "argora"
     ],
     "homepage": "https://github.com/getargora/foundry",
