@@ -1,6 +1,6 @@
 {% extends "layouts/app.twig" %}
 
-{% block title %}{{ __('View Invoice') }}{% endblock %}
+{% block title %}{{ __('View Invoice') }} {{ invoice_details.invoice_number }}{% endblock %}
 
 {% block content %}
       <div class="page-wrapper">
@@ -9,6 +9,19 @@
           <div class="container-xl">
             <div class="row g-2 align-items-center">
               <div class="col">
+                <div class="mb-1">
+                  <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                      <a href="{{route('home')}}"><svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><polyline points="5 12 3 12 12 3 21 12 19 12" /><path d="M5 12v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-8" /><rect x="10" y="12" width="4" height="4" /></svg></a>
+                    </li>
+                    <li class="breadcrumb-item">
+                      <a href="{{route('invoices')}}">{{ __('Invoices') }}</a>
+                    </li>
+                    <li class="breadcrumb-item active">
+                      {{ __('Invoice') }} {{ invoice_details.invoice_number }}
+                    </li>
+                  </ol>
+                </div>
                 <h2 class="page-title">
                   {{ __('Invoice') }} {{ invoice_details.invoice_number }}
                 </h2>
@@ -30,7 +43,7 @@
               <div class="card-body">
                 <div class="row">
                   <div class="col-6">
-                    <p class="h3">{{ __('Provider') }} / {{ __('Registry') }}</p>
+                    <p class="h3">{{ __('Provider') }}</p>
                     <address>
                       {{ company_name }}<br>
                       {{ vat_number }}<br>
@@ -41,7 +54,7 @@
                     </address>
                   </div>
                   <div class="col-6 text-end">
-                    <p class="h3">{{ __('Client') }} / {{ __('Registrar') }}</p>
+                    <p class="h3">{{ __('Client') }}</p>
                     <address>
                       {{ billing.org }}<br>
                       {{ billing_company }} / {{ billing_vat|default('N/A') }} {% if validVAT %}<svg xmlns="http://www.w3.org/2000/svg" class="icon text-success" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>{% endif %}<br>
@@ -79,23 +92,24 @@
                       <th class="text-end" style="width: 1%">{{ __('Amount') }}</th>
                     </tr>
                   </thead>
-                {% if statement is not empty %}
-                    {% set totalAmount = 0 %}
-                    {% for item in statement %}
-                        <tr>
-                            <td class="text-center">{{ loop.index }}</td>
-                            <td>
-                                <p class="strong mb-1">{{ item.command }} {{ item.domain_name }}</p>
-                            </td>
-                            <td class="text-end">{{ item.amount }}</td>
-                        </tr>
-                        {% set totalAmount = totalAmount + item.amount %}
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="3" class="text-center">{{ __('No items found.') }}</td>
-                    </tr>
-                {% endif %}      
+                  {% if statement is not empty %}
+                      {% set totalAmount = 0 %}
+                      {% for item in statement %}
+                          <tr>
+                              <td class="text-center">{{ loop.index }}</td>
+                              <td>
+                                    <p class="strong mb-1">{{ item.category|capitalize }} — {{ item.description }}</p>
+                                  <small class="text-muted">{{ item.created_at }}</small>
+                              </td>
+                              <td class="text-end">{{ item.amount }} {{ item.currency }}</td>
+                          </tr>
+                          {% set totalAmount = totalAmount + item.amount %}
+                      {% endfor %}
+                  {% else %}
+                      <tr>
+                          <td colspan="3" class="text-center">{{ __('No items found.') }}</td>
+                      </tr>
+                  {% endif %}
                   <tr>
                     <td colspan="2" class="strong text-end">{{ __('Subtotal') }}</td>
                     <td class="text-end">{{ netPrice }}</td>
@@ -113,7 +127,9 @@
                     <td class="font-weight-bold text-end">{{ total }}</td>
                   </tr>
                 </table>
-                <p class="text-secondary text-center mt-5">{{ __('Notes') }}: {{ invoice_details.notes }}</p>
+                {% if invoice_details.notes %}
+                    <p class="text-secondary text-center mt-5">{{ __('Notes') }}: {{ invoice_details.notes }}</p>
+                {% endif %}
                 <p class="text-secondary text-center mt-5">{{ __('Thank you very much for doing business with us. We look forward to working with you again!') }}</p>
               </div>
             </div>

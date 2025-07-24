@@ -36,11 +36,10 @@ class FinancialsController extends Controller
 
     public function viewInvoice(Request $request, Response $response, $args)
     {
-        $invoiceNumberPattern = '/^[A-Za-z]+\d+-?\d+$/';
         $args = trim($args);
 
-        if (preg_match($invoiceNumberPattern, $args)) {
-            $invoiceNumber = $args; // valid format
+        if (preg_match('/^[A-Za-z0-9\-]+$/', $args)) {
+            $invoiceNumber = $args;
         } else {
             $this->container->get('flash')->addMessage('error', 'Invalid invoice number');
             return $response->withHeader('Location', '/invoices')->withStatus(302);
@@ -53,67 +52,34 @@ class FinancialsController extends Controller
         $invoice_details = $db->selectRow('SELECT * FROM invoices WHERE invoice_number = ?',
         [ $invoiceNumber ]
         );
-        $billing = $db->selectRow('SELECT * FROM registrar_contact WHERE id = ?',
-        [ $invoice_details['billing_contact_id'] ]
+        $billing = $db->selectRow(
+            'SELECT * FROM users_contact WHERE id = ? AND type = \'billing\'',
+            [ $invoice_details['billing_contact_id'] ]
         );
-        $billing_company = $db->selectValue('SELECT companyNumber FROM registrar WHERE id = ?',
-        [ $invoice_details['registrar_id'] ]
+        $userData = $db->selectRow(
+            'SELECT currency, nin, vat_number, nin_type FROM users WHERE id = ?',
+            [ $invoice_details['user_id'] ]
         );
-        $currency = $db->selectValue('SELECT currency FROM registrar WHERE id = ?',
-        [ $invoice_details['registrar_id'] ]
-        );
-        $billing_vat = $db->selectValue('SELECT vatNumber FROM registrar WHERE id = ?',
-        [ $invoice_details['registrar_id'] ]
-        );
-        $company_name = $db->selectValue("SELECT value FROM settings WHERE name = 'company_name'");
-        $address = $db->selectValue("SELECT value FROM settings WHERE name = 'address'");
-        $address2 = $db->selectValue("SELECT value FROM settings WHERE name = 'address2'");
-        $cc = $db->selectValue("SELECT value FROM settings WHERE name = 'cc'");
-        $vat_number = $db->selectValue("SELECT value FROM settings WHERE name = 'vat_number'");
-        $phone = $db->selectValue("SELECT value FROM settings WHERE name = 'phone'");
-        $email = $db->selectValue("SELECT value FROM settings WHERE name = 'email'");
+
+        $currency = $userData['currency'] ?? null;
+        $nin = $userData['nin'] ?? null;
+        $billing_vat = $userData['vat_number'] ?? null;
+        $ninType = $userData['nin_type'] ?? null;
+
+        $company_name = envi('COMPANY_NAME');
+        $address      = envi('COMPANY_ADDRESS');
+        $address2     = envi('COMPANY_ADDRESS2');
+        $cc           = envi('COMPANY_COUNTRY_CODE');
+        $vat_number   = envi('COMPANY_VAT_NUMBER');
+        $phone        = envi('COMPANY_PHONE');
+        $email        = envi('COMPANY_EMAIL');
 
         $issueDate = new \DateTime($invoice_details['issue_date']);
         $firstDayPrevMonth = (clone $issueDate)->modify('first day of last month')->format('Y-m-d');
         $lastDayPrevMonth = (clone $issueDate)->modify('last day of last month')->format('Y-m-d');
-        $statement = $db->select('SELECT * FROM statement WHERE date BETWEEN ? AND ? AND registrar_id = ?',
-        [ $firstDayPrevMonth, $lastDayPrevMonth, $invoice_details['registrar_id'] ]
+        $statement = $db->select('SELECT * FROM transactions WHERE created_at BETWEEN ? AND ? AND user_id = ?',
+        [ $firstDayPrevMonth, $lastDayPrevMonth, $invoice_details['user_id'] ]
         );
-        
-        $refunds = $db->select("
-            SELECT 
-                date,
-                description,
-                amount * -1 AS amount -- negate the refund to show as negative
-            FROM payment_history
-            WHERE registrar_id = ?
-              AND date BETWEEN ? AND ?
-              AND description LIKE '%provides a credit%'
-        ", [
-            $invoice_details['registrar_id'],
-            $firstDayPrevMonth,
-            $lastDayPrevMonth
-        ]);
-
-        foreach ($refunds as &$r) {
-            $r['domain_name'] = '(refund)';
-            $r['command'] = 'REFUND';
-            $r['type'] = 'credit';
-
-            if (preg_match('/domain ([a-z0-9.-]+\.[a-z]{2,})/i', $r['description'], $matchDomain)) {
-                $r['domain_name'] = $matchDomain[1];
-            }
-
-            if (preg_match('/provides a credit (.*)$/i', $r['description'], $matchReason)) {
-                $r['reason'] = trim($matchReason[1]);
-            } else {
-                $r['reason'] = $r['description']; // fallback
-            }
-        }
-        unset($r);
-
-        $allTransactions = array_merge($statement, $refunds);
-        usort($allTransactions, fn($a, $b) => strtotime($a['date']) <=> strtotime($b['date']));
 
         $vatCalculator = new VatCalculator();
         $vatCalculator->setBusinessCountryCode(strtoupper($cc));
@@ -146,9 +112,9 @@ class FinancialsController extends Controller
         return view($response, 'admin/financials/viewInvoice.twig', [
             'invoice_details' => $invoice_details,
             'billing' => $billing,
-            'billing_company' => $billing_company,
+            'billing_company' => $nin,
             'billing_vat' => $billing_vat,
-            'statement' => $allTransactions,
+            'statement' => $statement,
             'company_name' => $company_name,
             'address' => $address,
             'address2' => $address2,

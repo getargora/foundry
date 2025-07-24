@@ -17,6 +17,12 @@ CREATE TABLE IF NOT EXISTS "users" (
     "auth_method" VARCHAR(255) DEFAULT 'password',
     "backup_codes" TEXT,
     "password_last_updated" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "nin" VARCHAR(255),
+    "vat_number" VARCHAR(64),
+    "nin_type" VARCHAR(20) CHECK (nin_type IN ('personal', 'business')),
+    "validation" VARCHAR(1) CHECK (validation IN ('0', '1', '2', '3', '4')),
+    "validation_stamp" TIMESTAMP(3),
+    "validation_log" VARCHAR(255),
     "currency" CHAR(3) NOT NULL DEFAULT 'EUR',
     "account_balance" NUMERIC(12,2) NOT NULL DEFAULT 0.00,
     "credit_limit" NUMERIC(12,2) NOT NULL DEFAULT 0.00
