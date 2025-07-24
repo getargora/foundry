@@ -20,6 +20,7 @@ use Psr\Container\ContainerInterface;
 use RobThree\Auth\TwoFactorAuth;
 use RobThree\Auth\Providers\Qr\BaconQrCodeProvider;
 use App\Auth\Auth;
+use League\ISO3166\ISO3166;
 
 class ProfileController extends Controller
 {
@@ -33,65 +34,72 @@ class ProfileController extends Controller
     {
         global $container;
 
-        $username = $_SESSION['auth_username'];
-        $email = $_SESSION['auth_email'];
-        $userId = $_SESSION['auth_user_id'];
-        $status = $_SESSION['auth_status'];
-
+        $session = $_SESSION;
         $db = $container->get('db');
+
+        $userId = $session['auth_user_id'];
+        $email = $session['auth_email'];
+        $username = $session['auth_username'];
+
+        // Determine role
+        $roleMap = [0 => 'Administrator', 4 => 'Client'];
+        $role = $roleMap[$session['auth_roles']] ?? 'Unknown';
+
+        // Determine status
+        $status = ($session['auth_status'] == 0) ? 'Confirmed' : 'Unknown';
         
-        $qrCodeProvider = new BaconQRCodeProvider($borderWidth = 0, $backgroundColour = '#ffffff', $foregroundColour = '#000000', $format = 'svg');
+        // 2FA Setup
         $tfa = new TwoFactorAuth(
-            issuer: "Namingo",
-            qrcodeprovider: $qrCodeProvider,
+            issuer: "Foundry",
+            qrcodeprovider: new BaconQRCodeProvider(0, '#ffffff', '#000000', 'svg')
         );
-
         $secret = $tfa->createSecret(160, true);
-        $qrcodeDataUri = $tfa->getQRCodeImageAsDataUri($email, $secret);
-        
-        if ($status == 0) {
-            $status = "Confirmed";
-        } else {
-            $status = "Unknown";
-        }
-
-        $roles = $_SESSION['auth_roles'];
-        if ($roles == 0) {
-            $role = "Administrator";
-        } else if ($roles == 4) {
-            $role = "Client";
-        } else {
-            $role = "Unknown";
-        }
-
-        $csrfName = $container->get('csrf')->getTokenName();
-        $csrfValue = $container->get('csrf')->getTokenValue();
-        
         $_SESSION['2fa_secret'] = $secret;
-        
-        $is_2fa_activated = $db->selectValue(
-            'SELECT tfa_enabled FROM users WHERE id = ? LIMIT 1',
-            [$userId]
-        );
-        $is_weba_activated = $db->select(
-            'SELECT * FROM users_webauthn WHERE user_id = ? ORDER BY created_at DESC LIMIT 5',
-            [$userId]
-        );
-        $isWebAuthnEnabled = (envi('WEB_AUTHN_ENABLED') === 'true') ? true : false;
+        $qrcodeDataUri = $tfa->getQRCodeImageAsDataUri($email, $secret);
+            
+        // CSRF Tokens
+        $csrf = $container->get('csrf');
+        $csrfName = $csrf->getTokenName();
+        $csrfValue = $csrf->getTokenValue();
 
-        $balance = $db->selectRow(
-            'SELECT currency, account_balance FROM users WHERE id = ? LIMIT 1',
-            [$userId]
-        );
+        // Fetch account data
+        $is2FA = $db->selectValue('SELECT tfa_enabled FROM users WHERE id = ?', [$userId]);
+        $webauthn = $db->select('SELECT * FROM users_webauthn WHERE user_id = ? ORDER BY created_at DESC LIMIT 5', [$userId]);
+        $isWebAuthnEnabled = (envi('WEB_AUTHN_ENABLED') === 'true');
 
-        if ($is_2fa_activated) {
-            return view($response,'admin/profile/profile.twig',['email' => $email, 'username' => $username, 'status' => $status, 'role' => $role, 'csrf_name' => $csrfName, 'csrf_value' => $csrfValue, 'balance' => $balance]);
-        } else if ($is_weba_activated) {
-            return view($response,'admin/profile/profile.twig',['email' => $email, 'username' => $username, 'status' => $status, 'role' => $role, 'qrcodeDataUri' => $qrcodeDataUri, 'secret' => $secret, 'csrf_name' => $csrfName, 'csrf_value' => $csrfValue, 'weba' => $is_weba_activated, 'balance' => $balance]);
+        $user_data = $db->selectRow('SELECT nin, vat_number, nin_type, validation, currency, account_balance FROM users WHERE id = ?', [$userId]);
+
+        // Base payload
+        $data = compact(
+            'email', 'username', 'status', 'role',
+            'csrfName', 'csrfValue', 'user_data'
+        );
+        $data['csrf_name'] = $csrfName;
+        $data['csrf_value'] = $csrfValue;
+
+        // Add security options to payload
+        if ($is2FA) {
+            // No QR code shown
+        } elseif ($webauthn) {
+            $data['qrcodeDataUri'] = $qrcodeDataUri;
+            $data['secret'] = $secret;
+            $data['weba'] = $webauthn;
         } else {
-            return view($response,'admin/profile/profile.twig',['email' => $email, 'username' => $username, 'status' => $status, 'role' => $role, 'qrcodeDataUri' => $qrcodeDataUri, 'secret' => $secret, 'csrf_name' => $csrfName, 'csrf_value' => $csrfValue, 'isWebaEnabled' => $isWebAuthnEnabled, 'balance' => $balance]);
+            $data['qrcodeDataUri'] = $qrcodeDataUri;
+            $data['secret'] = $secret;
+            $data['isWebaEnabled'] = $isWebAuthnEnabled;
         }
 
+        $contacts = $db->select("SELECT * FROM users_contact WHERE user_id = ?", [ $userId ]);
+        if ($contacts) {
+            $data['contacts'] = $contacts;
+
+            $iso3166 = new ISO3166();
+            $countries = $iso3166->all();
+            $data['countries'] = $countries;
+        }
+
+        return view($response, 'admin/profile/profile.twig', $data);
     }
 
     public function activate2fa(Request $request, Response $response)

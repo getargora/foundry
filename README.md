@@ -12,7 +12,7 @@
 - **Built-in Control Panel** – A modern and customizable UI template for managing users, settings, and services out of the box.
 - **SaaS-Ready** – Includes essential SaaS features like user authentication, roles & permissions, usage tracking, and more.
 - **Modern Stack** – Powered by PHP 8+, Slim 4 Framework, Twig templates, and Tabler UI for a clean frontend.
-- **Extensible & Tested** – Designed to be extended with custom modules, and includes support for PHPUnit or Pest for reliable testing.
+- **Extensible** – Designed to be extended with custom modules.
 
 ## 🛠️ Ideal For
 
@@ -31,16 +31,13 @@
 | Category | Package | Integrated |
 | --- | --- | --- |
 | Storage | [league/flysystem](https://packagist.org/packages/league/flysystem) | ❌ |
-| Database | [pinga/db](https://packagist.org/packages/pinga/db) | ✅ |
-| Forms | [jarzon/form](https://packagist.org/packages/jarzon/form) | ❌ |
-| Cookies | [pinga/cookie](https://packagist.org/packages/pinga/cookie) or [dflydev/dflydev-fig-cookies] | ❌ |(https://packagist.org/packages/dflydev/dflydev-fig-cookies) | ❌ |
-| Session | [pinga/session](https://packagist.org/packages/pinga/session) or [compwright/php-session](compwright/php-session)<br>[neoflow/session](neoflow/session) | ❌ |
+| Cookies | consider [dflydev/dflydev-fig-cookies] | ❌ |(https://packagist.org/packages/dflydev/dflydev-fig-cookies) | ❌ |
+| Session | consider [compwright/php-session](compwright/php-session)<br>[neoflow/session](neoflow/session) | ❌ |
 | Cache | [pinga/cache](https://github.com/getpinga/cache) or [matthiasmullie/scrapbook](https://packagist.org/packages/matthiasmullie/scrapbook) | ❌ |
 | Backup | [PHPBU](https://phpbu.de/) | ❌ |
 | Payment | [utopia-php/pay](https://packagist.org/packages/utopia-php/pay) | ❌ |
 | DB Audit | [setbased/php-audit](https://packagist.org/packages/setbased/php-audit) | ❌ |
 | KYC | [Ballerine](https://github.com/ballerine-io/ballerine) | ❌ | N/A | ❌ |
-| Admin UI | [Tabler](https://github.com/tabler/tabler) | ✅ | ❌ | ❌ |
 | Benchmark | [eypsilon/MycroBench](https://packagist.org/packages/eypsilon/MycroBench) or [phpbench/phpbench](https://packagist.org/packages/phpbench/phpbench) | ❌ |
 
 ## 📦 Installation
