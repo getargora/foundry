@@ -14,84 +14,29 @@
     }
 
     function statusFormatter(cell) {
-        var statusArray = cell.getValue();
-        if (statusArray && Array.isArray(statusArray)) {
-            return statusArray.map(item => item.status).join(', ');
-        }
-        return "";
-    }
-
-    function roleLabelFormatter(cell) {
-        var value = cell.getValue();
-
-        // Define role mappings with labels and styles
-        var roles = [
-            { bit: 0, label: 'Administrator', class: 'status status-purple' },
-            { bit: 4, label: 'Registrar', class: 'status status-indigo' },
-            { bit: 8, label: 'Accountant', class: 'status status-green' },
-            { bit: 16, label: 'Support', class: 'status status-azure' },
-            { bit: 32, label: 'Auditor', class: 'status status-orange' },
-            { bit: 64, label: 'Sales', class: 'status status-teal' }
-        ];
-
-        // Special case for Administrator (no roles assigned)
-        if (value === 0) {
-            return '<span class="status status-purple">Administrator</span>';
-        }
-
-        // Check assigned roles using bitmask
-        var assignedRoles = roles
-            .filter(function (role) {
-                return role.bit !== 0 && (value & role.bit);
-            })
-            .map(function (role) {
-                return '<span class="' + role.class + '">' + role.label + '</span>';
-            });
-
-        // Join assigned roles with separators
-        return assignedRoles.length > 0 ? assignedRoles.join(', ') : '<span class="status status-secondary">Unknown Role</span>';
-    }
-    
-    function verifiedFormatter(cell) {
-        var value = cell.getValue();
-        if (value === false) {
-            return '<span class="status status-orange">Pending</span>';
-        } else if (value === true) {
-            return '<span class="status status-green">ok</span>';
-        } else {
-            return '<span class="status status-dark">?</span>';
-        }
-        return value;
-    }
-
-    function statusBadgeFormatter(cell) {
         const value = cell.getValue();
         let badgeClass = 'secondary';
         let statusText = 'Unknown';
 
         switch (value) {
-            case 0: // NORMAL
+            case 'active':
                 badgeClass = 'success';
-                statusText = 'Normal';
+                statusText = 'Active';
                 break;
-            case 1: // ARCHIVED
-                badgeClass = 'dark';
-                statusText = 'Archived';
-                break;
-            case 2: // BANNED
-                badgeClass = 'danger';
-                statusText = 'Banned';
-                break;
-            case 4: // PENDING_REVIEW
+            case 'pending':
                 badgeClass = 'warning';
-                statusText = 'Pending Review';
+                statusText = 'Pending';
                 break;
-            case 5: // SUSPENDED
-                badgeClass = 'info';
-                statusText = 'Suspended';
+            case 'failed':
+                badgeClass = 'danger';
+                statusText = 'Failed';
+                break;
+            case 'cancelled':
+                badgeClass = 'secondary';
+                statusText = 'Cancelled';
                 break;
             default:
-                badgeClass = 'secondary';
+                badgeClass = 'dark';
                 statusText = 'Unknown';
         }
 
@@ -162,12 +107,19 @@
         placeholder: "{{ __('No Data') }}",
         columns:[
             {formatter:"responsiveCollapse", width:40, minWidth:40, hozAlign:"center", resizable:false, headerSort:false, responsive:0},
-            {title:"{{ __('ID') }}", field:"id", minWidth:60, resizable:false, headerSort:true, responsive:0},
-            {title:"{{ __('Date') }}", field:"created_at", minWidth:200, resizable:false, headerSort:true, responsive:0},
-            {title:"{{ __('User') }}", field:"user_id", width:100, resizable:false, headerSort:true, responsive:2},
-            {title:"{{ __('Service') }}", field:"service_type", width:250, resizable:false, headerSort:true, formatter: roleLabelFormatter, responsive:2},
-            {title:"{{ __('Status') }}", field:"status", width:150, resizable:false, headerSort:true, formatter: verifiedFormatter, responsive:2},
-            {title:"{{ __('Amount') }}", field:"amount_due", width:100, resizable:false, headerSort:true, formatter: statusBadgeFormatter, responsive:2},
+            {title:"{{ __('ID') }}", field:"id", minWidth:40, resizable:false, headerSort:true, responsive:0},
+            {title:"{{ __('Date') }}", field:"created_at", minWidth:220, resizable:false, headerSort:true, responsive:0},
+            {title:"{{ __('User') }}", field:"user_id", minWidth:100, resizable:false, headerSort:true, responsive:2},
+            {title:"{{ __('Service') }}", field:"service_type", width:120, resizable:false, headerSort:true, responsive:2},
+            {title:"{{ __('Status') }}", field:"status", minWidth:150, resizable:false, headerSort:true, formatter: statusFormatter, responsive:2},
+            {title:"{{ __('Amount') }}", field:"amount_due", resizable:false, minWidth:150, headerSort:true, responsive:0, formatter:"money",  formatterParams:function(cell){
+                return {
+                    decimal: ".",
+                    thousand: " ",
+                    symbol: (cell.getRow().getData().currency || "$") + " ", // Ensures space after currency symbol
+                    negativeSign: true
+                };
+            }},
             {title: "{{ __('Actions') }}", formatter: actionsFormatter, responsive:0, headerSort: false, download:false, hozAlign: "center", cellClick:function(e, cell){ e.stopPropagation(); }},
         ]
     });
