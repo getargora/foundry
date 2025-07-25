@@ -36,7 +36,20 @@ class OrdersController extends Controller
         $providers = $db->select("SELECT id, name, type, api_endpoint, credentials, pricing FROM providers WHERE status = 'active'");
 
         foreach ($providers as &$provider) {
-            $provider['products'] = json_decode($provider['pricing'], true) ?? [];
+            $rawProducts = json_decode($provider['pricing'], true) ?? [];
+            $enrichedProducts = [];
+
+            foreach ($rawProducts as $tld => $actions) {
+                $enrichedProducts[$tld] = $actions;
+                $enrichedProducts[$tld]['type'] = 'domain';
+                $enrichedProducts[$tld]['label'] = $tld;
+                $enrichedProducts[$tld]['description'] = 'Domain services for ' . $tld;
+                $enrichedProducts[$tld]['price'] = $actions['register']['1'] ?? 0;
+                $enrichedProducts[$tld]['billing'] = 'year';
+                $enrichedProducts[$tld]['fields'] = [];
+            }
+
+            $provider['products'] = $enrichedProducts;
         }
 
         return $this->container->get('view')->render($response, 'admin/orders/create.twig', [

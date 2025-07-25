@@ -3,7 +3,7 @@
 {% block title %}{{ __('User Deposit') }}{% endblock %}
 
 {% block content %}
-<link href="/assets/css/sweetalert2.min.css" rel="stylesheet">
+<link href="/assets/modules/css/sweetalert2.min.css" rel="stylesheet">
 <style>
     .payment-provider-custom {
         display: inline-block;
@@ -77,8 +77,8 @@
                   <form id="depositForm" action="#" method="post">
                   {{ csrf.field | raw }}                 
                     <div class="deposit-info">
-                        <h5>{{ __('Current Balance for') }} {{ balance.name }}</h5>
-                        <p class="fs-4">{{ currency }} {{ balance.accountBalance }}</p>
+                        <h5>{{ __('Current Balance for') }} {{ balance.username }}</h5>
+                        <p class="fs-4">{{ currency }} {{ balance.account_balance }}</p>
                     </div>
 
                     <div class="mb-3">

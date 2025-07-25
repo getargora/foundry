@@ -196,6 +196,8 @@
     {% include 'partials/js-invoices.twig' %}
 {% elseif route_is('profile') %}
     {% include 'partials/js-profile.twig' %}
+{% elseif route_is('deposit') %}
+    {% include 'partials/js-deposit.twig' %}
 {% else %}
     {% include 'partials/js.twig' %}
 {% endif %}

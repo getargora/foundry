@@ -48,23 +48,25 @@
                     <div class="row">
                       {% for provider in providers %}
                         {% for code, product in provider.products %}
-                          <div class="col-md-4 mb-4">
-                            {% set safe_id = 'card-' ~ provider.id ~ '-' ~ code|replace({'.': '-', ':': '-'}) %}
-                            <label class="card h-100 cursor-pointer position-relative" id="{{ safe_id }}" onclick="selectProduct('{{ provider.id }}', '{{ code }}', '{{ safe_id }}')">
-                              <input type="radio" name="product_choice" class="form-check-input position-absolute top-0 end-0 m-3 z-index-3" value="{{ provider.id }}::{{ code }}" required>
-                              <div class="card-status-start bg-primary d-none"></div>
-                              <div class="card-body">
-                                <div class="d-flex align-items-center justify-content-between mb-2">
-                                  <span class="badge bg-blue text-blue-fg">€{{ product.price }}/{{ product.billing }}</span>
+                          {% if product.type == 'domain' %}
+                            <div class="col-md-4 mb-4">
+                              {% set safe_id = 'card-' ~ provider.id ~ '-' ~ code|replace({'.': '-', ':': '-'}) %}
+                              <label class="card h-100 cursor-pointer position-relative" id="{{ safe_id }}" onclick="selectProduct('{{ provider.id }}', '{{ code }}', '{{ safe_id }}')">
+                                <input type="radio" name="product_choice" class="form-check-input position-absolute top-0 end-0 m-3 z-index-3" value="{{ provider.id }}::{{ code }}" required>
+                                <div class="card-status-start bg-primary d-none"></div>
+                                <div class="card-body">
+                                  <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="badge bg-blue text-blue-fg">from €{{ product.register['1']|default(0) }}/{{ product.billing }}</span>
+                                  </div>
+                                  <h4 class="card-title mb-0">{{ product.label }}</h4>
+                                  <p class="text-muted small mb-2">{{ provider.name }} — {{ product.description }}</p>
+                                  <div class="text-end">
+                                    <span class="badge bg-light text-light-fg">Click to configure</span>
+                                  </div>
                                 </div>
-                                <h4 class="card-title mb-0">{{ product.label }}</h4>
-                                <p class="text-muted small mb-2">{{ provider.name }} — {{ product.description }}</p>
-                                <div class="text-end">
-                                  <span class="badge bg-light text-light-fg">Click to configure</span>
-                                </div>
-                              </div>
-                            </label>
-                          </div>
+                              </label>
+                            </div>
+                          {% endif %}
                         {% endfor %}
                       {% endfor %}
                     </div>
