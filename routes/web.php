@@ -70,8 +70,8 @@ $app->group('', function ($route) {
     $route->get('/orders/delete', OrdersController::class .':deleteOrder')->setName('deleteOrder');
 
     $route->get('/services', ServicesController::class .':listServices')->setName('listServices');
-    $route->get('/services/edit', ServicesController::class .':editService')->setName('editService');
-    $route->get('/services/{service}', ServicesController::class . ':viewService')->setName('viewService');
+    $route->get('/services/{service}/edit', ServicesController::class . ':editService')->setName('editService');
+    $route->post('/services/{service}/update', ServicesController::class . ':updateService')->setName('updateService');
     $route->get('/service-logs', ServicesController::class .':serviceLogs')->setName('serviceLogs');
 
     $route->get('/providers', ProvidersController::class .':listProviders')->setName('listProviders');
