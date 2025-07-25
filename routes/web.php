@@ -70,15 +70,15 @@ $app->group('', function ($route) {
     $route->get('/orders/delete', OrdersController::class .':deleteOrder')->setName('deleteOrder');
 
     $route->get('/services', ServicesController::class .':listServices')->setName('listServices');
-    $route->get('/services/view', ServicesController::class .':viewService')->setName('viewService');
     $route->get('/services/edit', ServicesController::class .':editService')->setName('editService');
+    $route->get('/services/{service}', ServicesController::class . ':viewService')->setName('viewService');
     $route->get('/service-logs', ServicesController::class .':serviceLogs')->setName('serviceLogs');
 
     $route->get('/providers', ProvidersController::class .':listProviders')->setName('listProviders');
-    $route->get('/providers/view', ProvidersController::class .':viewProvider')->setName('viewProvider');
-    $route->map(['GET', 'POST'], '/provider/create', ProvidersController::class . ':createProvider')->setName('createProvider');
-    $route->get('/providers/edit', ProvidersController::class .':editProvider')->setName('editProvider');
-    $route->get('/providers/delete', ProvidersController::class .':deleteProvider')->setName('deleteProvider');
+    $route->map(['GET', 'POST'], '/providers/create', ProvidersController::class . ':createProvider')->setName('createProvider');
+    $route->get('/providers/{provider}/edit', ProvidersController::class . ':editProvider')->setName('editProvider');
+    $route->post('/providers/{provider}/update', ProvidersController::class . ':updateProvider')->setName('updateProvider');
+    $route->get('/providers/{provider}/delete', ProvidersController::class . ':deleteProvider')->setName('deleteProvider');
 
     $route->get('/invoices', FinancialsController::class .':invoices')->setName('invoices');
     $route->get('/invoice/{invoice}', FinancialsController::class . ':viewInvoice')->setName('viewInvoice');
