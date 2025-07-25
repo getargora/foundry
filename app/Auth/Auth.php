@@ -28,11 +28,6 @@ use Pinga\Auth\UnknownIdException;
 use RobThree\Auth\TwoFactorAuth;
 use RobThree\Auth\Providers\Qr\BaconQrCodeProvider;
 
-/**
- * Auth
- *
- * @author    Hezekiah O. <support@hezecom.com>
- */
 class Auth
 {
     static protected $auth;
@@ -92,7 +87,6 @@ class Auth
         $auth = self::$auth;
         try {
             $auth->confirmEmail($selector, $token);
-            //echo 'Email address has been verified';
             redirect()->route('login')->with('success','Email address has been verified');
         }
         catch (InvalidSelectorTokenPairException $e) {
@@ -144,6 +138,12 @@ class Auth
      */
     public static function login($email, $password, $remember=null, $code=null){
         $auth = self::$auth;
+
+        if (empty($email) || empty($password)) {
+            redirect()->route('login')->with('error', 'Please enter both email and password');
+            return;
+        }
+
         try {
             if ($remember !='') {
                 // keep logged in for one year
