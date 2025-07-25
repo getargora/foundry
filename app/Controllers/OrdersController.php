@@ -50,11 +50,13 @@ class OrdersController extends Controller
             }
 
             $provider['products'] = $enrichedProducts;
+            $provider['credentials'] = json_decode($provider['credentials'], true) ?? [];
         }
 
         return $this->container->get('view')->render($response, 'admin/orders/create.twig', [
             'providers' => $providers,
-            'user' => $_SESSION['auth_user_id'] ?? null
+            'user' => $_SESSION['auth_user_id'] ?? null,
+            'currency' => $_SESSION['_currency'] ?? 'EUR'
         ]);
     }
 

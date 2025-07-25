@@ -56,7 +56,7 @@
                                 <div class="card-status-start bg-primary d-none"></div>
                                 <div class="card-body">
                                   <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <span class="badge bg-blue text-blue-fg">from €{{ product.register['1']|default(0) }}/{{ product.billing }}</span>
+                                    <span class="badge bg-blue text-blue-fg">from {{ currency }} {{ product.register['1']|default(0) }}/{{ product.billing }}</span>
                                   </div>
                                   <h4 class="card-title mb-0">{{ product.label }}</h4>
                                   <p class="text-muted small mb-2">{{ provider.name }} — {{ product.description }}</p>
@@ -71,14 +71,9 @@
                       {% endfor %}
                     </div>
 
-                    <div id="productFields" class="mt-4 d-none">
-                      <h4>Service Details</h4>
-                      <div id="dynamicFields" class="row g-3"></div>
-                    </div>
-
-                    <div id="extraFields" class="mt-4 d-none">
-                        <h4>Additional Configuration</h4>
-                      <div class="row g-3" id="extraDynamicFields">
+                    <div id="productFields" class="d-none">
+                      <h4>Order Details</h4>
+                      <div class="row g-3" id="dynamicFields">
                         <!-- Dynamic domain/contact fields here -->
                       </div>
                     </div>
@@ -97,6 +92,7 @@
       </div>
 <script>
 const productData = {{ providers|json_encode|raw }};
+const currency = {{ currency|json_encode|raw }};
 
 function selectProduct(providerId, productCode, cardId) {
   document.querySelectorAll('.card .card-status-start').forEach(el => el.classList.add('d-none'));
@@ -114,20 +110,13 @@ function selectProduct(providerId, productCode, cardId) {
   const provider = productData.find(p => p.id == providerId);
   const product = provider.products[productCode];
 
-  const fieldContainer = document.getElementById('dynamicFields');
-  fieldContainer.innerHTML = '';
-  (product.fields || []).forEach(field => {
-    fieldContainer.innerHTML += `
-      <div class="col-md-6">
-        <label class="form-label">${field.label}</label>
-        <input type="text" name="config[${field.name}]" class="form-control" placeholder="${field.placeholder || ''}" ${field.required ? 'required' : ''}>
-      </div>`;
-  });
-
   document.getElementById('productFields').classList.remove('d-none');
 
-  const extra = document.getElementById('extraDynamicFields');
+  const extra = document.getElementById('dynamicFields');
+
   if (product.type === 'domain') {
+    const requiredFields = provider.credentials?.required_fields || {};
+
     extra.innerHTML = `
       <div class="col-md-8">
         <label class="form-label">Domain Name</label>
@@ -141,7 +130,8 @@ function selectProduct(providerId, productCode, cardId) {
       <div class="col-md-4">
         <label class="form-label">Registration Period</label>
         <select name="config[years]" class="form-select" required>
-          ${[...Array(10)].map((_, i) => `<option value="${i + 1}">${i + 1} year(s)</option>`).join('')}
+          ${Object.entries(product.register || {}).map(([year, price]) => 
+            `<option value="${year}">${year} year(s) (${currency} ${parseFloat(price).toFixed(2)})</option>`).join('')}
         </select>
       </div>
 
@@ -191,10 +181,18 @@ function selectProduct(providerId, productCode, cardId) {
         </div>
       </div>
     `;
-    document.getElementById('extraFields').classList.remove('d-none');
+    
+    Object.entries(requiredFields).forEach(([fieldName, fieldDef]) => {
+      const fieldType = fieldDef.type || 'text';
+      extra.innerHTML += `
+        <div class="col-md-6">
+          <label class="form-label">${fieldDef.label || fieldName}</label>
+          <input type="${fieldType}" name="config[${fieldName}]" class="form-control" placeholder="${fieldDef.hint || ''}" ${fieldDef.required ? 'required' : ''}>
+        </div>
+      `;
+    });
   } else {
     extra.innerHTML = '';
-    document.getElementById('extraFields').classList.add('d-none');
   }
 }
 
