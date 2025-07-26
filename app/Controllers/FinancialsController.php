@@ -61,6 +61,11 @@ class FinancialsController extends Controller
             [ $invoice_details['user_id'] ]
         );
 
+        if (!in_array($invoice_details['payment_status'] ?? '', ['unpaid', 'overdue'], true)) {
+            $this->container->get('flash')->addMessage('error', 'This invoice cannot be paid because it is already settled or not payable.');
+            return $response->withHeader('Location', '/invoices')->withStatus(302);
+        }
+
         $currency = $userData['currency'] ?? null;
         $nin = $userData['nin'] ?? null;
         $billing_vat = $userData['vat_number'] ?? null;
@@ -129,6 +134,81 @@ class FinancialsController extends Controller
             'total' => $formattedTotalAmount,
             'currentUri' => $uri,
             'billing_country' => $billing_country,
+        ]);
+
+    }
+
+    public function payInvoice(Request $request, Response $response, $args)
+    {
+        $args = trim($args);
+
+        if (preg_match('/^[A-Za-z0-9\-]+$/', $args)) {
+            $invoiceNumber = $args;
+        } else {
+            $this->container->get('flash')->addMessage('error', 'Invalid invoice number');
+            return $response->withHeader('Location', '/invoices')->withStatus(302);
+        }
+
+        $iso3166 = new ISO3166();
+        $db = $this->container->get('db');
+        // Get the current URI
+        $uri = $request->getUri()->getPath();
+        $invoice_details = $db->selectRow('SELECT * FROM invoices WHERE invoice_number = ?',
+        [ $invoiceNumber ]
+        );
+        $billing = $db->selectRow(
+            'SELECT * FROM users_contact WHERE id = ? AND type = \'billing\'',
+            [ $invoice_details['billing_contact_id'] ]
+        );
+        $userData = $db->selectRow(
+            'SELECT currency, nin, vat_number, nin_type FROM users WHERE id = ?',
+            [ $invoice_details['user_id'] ]
+        );
+
+        $currency = $userData['currency'] ?? null;
+        $nin = $userData['nin'] ?? null;
+        $billing_vat = $userData['vat_number'] ?? null;
+        $ninType = $userData['nin_type'] ?? null;
+
+        $cc           = envi('COMPANY_COUNTRY_CODE');
+        $vat_number   = envi('COMPANY_VAT_NUMBER');
+
+        $issueDate = new \DateTime($invoice_details['issue_date']);
+        $firstDayPrevMonth = (clone $issueDate)->modify('first day of last month')->format('Y-m-d');
+        $lastDayPrevMonth = (clone $issueDate)->modify('last day of last month')->format('Y-m-d');
+
+        $vatCalculator = new VatCalculator();
+        $vatCalculator->setBusinessCountryCode(strtoupper($cc));
+        $grossPrice = $vatCalculator->calculate($invoice_details['total_amount'], strtoupper($billing['cc']));
+        $taxRate = $vatCalculator->getTaxRate();
+        $netPrice = $vatCalculator->getNetPrice(); 
+        $taxValue = $vatCalculator->getTaxValue(); 
+        if ($vatCalculator->shouldCollectVAT(strtoupper($billing['cc']))) {
+            $validVAT = $vatCalculator->isValidVatNumberFormat($vat_number);
+        } else {
+            $validVAT = null;
+        }
+        $totalAmount = $grossPrice + $taxValue;
+        $billing_country = $iso3166->alpha2($billing['cc']);
+        $billing_country = $billing_country['name'];
+
+        $locale = $_SESSION['_lang'] ?? 'en_US'; // Fallback to 'en_US' if no locale is set
+
+        // Initialize the number formatter for the locale
+        $numberFormatter = new \NumberFormatter($locale, \NumberFormatter::DECIMAL);
+        $currencyFormatter = new \NumberFormatter($locale, \NumberFormatter::CURRENCY);
+
+        // Format values explicitly with the session currency
+        $formattedVatRate = $numberFormatter->format($taxRate * 100) . "%";
+        $formattedVatAmount = $currencyFormatter->formatCurrency($taxValue, $currency);
+        $formattedNetPrice = $currencyFormatter->formatCurrency($netPrice, $currency);
+        $formattedTotalAmount = $currencyFormatter->formatCurrency($totalAmount, $currency);
+
+        // Pass formatted values to Twig
+        return view($response, 'admin/financials/payInvoice.twig', [
+            'invoice_details' => $invoice_details,
+            'total' => $formattedTotalAmount,
+            'currentUri' => $uri,
         ]);
 
     }
