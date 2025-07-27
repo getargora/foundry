@@ -104,9 +104,9 @@
         placeholder: "{{ __('No Data') }}",
         columns:[
             {formatter:"responsiveCollapse", width:40, minWidth:40, hozAlign:"center", resizable:false, headerSort:false, responsive:0},
-            {title:"{{ __('Provider') }}", field:"name", minWidth:250, resizable:false, headerSort:true, responsive:0},
-            {title:"{{ __('Type') }}", field:"type", minWidth:200, resizable:false, headerSort:true, responsive:0},
-            {title:"{{ __('Endpoint') }}", field:"api_endpoint", minWidth:200, resizable:false, headerSort:true, responsive:0},
+            {title:"{{ __('Provider') }}", field:"name", minWidth:150, resizable:false, headerSort:true, responsive:0},
+            {title:"{{ __('Type') }}", field:"type", minWidth:200, resizable:false, headerSort:true, responsive:2},
+            {title:"{{ __('Endpoint') }}", field:"api_endpoint", minWidth:200, resizable:false, headerSort:true, responsive:2},
             {title:"{{ __('Status') }}", field:"status", width:200, resizable:false, headerSort:true, formatter: statusBadgeFormatter, responsive:2},
             {title:"{{ __('Created') }}", field:"created_at", minWidth:150, resizable:false, headerSort:true, responsive:2},
             {title: "{{ __('Actions') }}", formatter: actionsFormatter, minWidth:150, resizable:false, headerSort:false, download:false, hozAlign: "center", responsive:0, cellClick: function(e, cell){
