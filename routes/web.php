@@ -65,10 +65,13 @@ $app->group('', function ($route) {
     $route->get('/leave_impersonation', UsersController::class . ':leave_impersonation')->setName('leave_impersonation');
 
     $route->get('/orders', OrdersController::class .':listOrders')->setName('listOrders');
-    $route->get('/orders/view', OrdersController::class .':viewOrder')->setName('viewOrder');
-    $route->map(['GET', 'POST'], '/order/create', OrdersController::class .':createOrder')->setName('createOrder');
-    $route->get('/orders/edit', OrdersController::class .':editOrder')->setName('editOrder');
-    $route->get('/orders/delete', OrdersController::class .':deleteOrder')->setName('deleteOrder');
+    $route->map(['GET', 'POST'], '/orders/create', OrdersController::class .':createOrder')->setName('createOrder');
+    $route->get('/orders/{order}', OrdersController::class .':viewOrder')->setName('viewOrder');
+    $route->map(['GET', 'POST'], '/orders/{order}/pay', OrdersController::class .':payOrder')->setName('payOrder');
+    $route->map(['GET', 'POST'], '/orders/{order}/activate', OrdersController::class .':activateOrder')->setName('activateOrder');
+    $route->map(['GET', 'POST'], '/orders/{order}/cancel', OrdersController::class .':cancelOrder')->setName('cancelOrder');
+    $route->map(['GET', 'POST'], '/orders/{order}/retry', OrdersController::class .':retryOrder')->setName('retryOrder');
+    $route->get('/orders/{order}/delete', OrdersController::class .':deleteOrder')->setName('deleteOrder');
 
     $route->get('/services', ServicesController::class .':listServices')->setName('listServices');
     $route->get('/services/{service}/edit', ServicesController::class . ':editService')->setName('editService');

@@ -25,7 +25,7 @@ class OrdersController extends Controller
         return view($response, 'admin/orders/index.twig');
     }
 
-    public function viewOrder(Request $request, Response $response, array $args): Response
+    public function viewOrder(Request $request, Response $response, string $args): Response
     {
         return view($response, 'admin/orders/view.twig', ['id' => $args['id'] ?? null]);
     }
@@ -60,12 +60,27 @@ class OrdersController extends Controller
         ]);
     }
 
-    public function editOrder(Request $request, Response $response, array $args): Response
+    public function payOrder(Request $request, Response $response, string $args): Response
+    {
+        return view($response, 'admin/orders/edit.twig', ['id' => $args['id'] ?? null]);
+    }
+    
+    public function activateOrder(Request $request, Response $response, string $args): Response
+    {
+        return view($response, 'admin/orders/edit.twig', ['id' => $args['id'] ?? null]);
+    }
+    
+    public function cancelOrder(Request $request, Response $response, string $args): Response
+    {
+        return view($response, 'admin/orders/edit.twig', ['id' => $args['id'] ?? null]);
+    }
+    
+    public function retryOrder(Request $request, Response $response, string $args): Response
     {
         return view($response, 'admin/orders/edit.twig', ['id' => $args['id'] ?? null]);
     }
 
-    public function deleteOrder(Request $request, Response $response, array $args): Response
+    public function deleteOrder(Request $request, Response $response, string $args): Response
     {
         return view($response, 'admin/orders/delete.twig', ['id' => $args['id'] ?? null]);
     }

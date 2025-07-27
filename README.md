@@ -12,6 +12,7 @@
 - **Built-in Control Panel** – A modern and customizable UI template for managing users, settings, and services out of the box.
 - **SaaS-Ready** – Includes essential SaaS features like user authentication, roles & permissions, usage tracking, and more.
 - **Modern Stack** – Powered by PHP 8+, Slim 4 Framework, Twig templates, and Tabler UI for a clean frontend.
+- **Argora Spark API** – A dedicated, extensible API layer for advanced logic, automation, and integration beyond basic CRUD, ideal for smart provisioning and external system hooks.
 - **Extensible** – Designed to be extended with custom modules.
 
 ## 🛠️ Ideal For
@@ -32,7 +33,7 @@
 | --- | --- | --- |
 | Storage | [league/flysystem](https://packagist.org/packages/league/flysystem) | ❌ |
 | Cookies | consider [dflydev/dflydev-fig-cookies] | ❌ |(https://packagist.org/packages/dflydev/dflydev-fig-cookies) | ❌ |
-| Session | consider [compwright/php-session](compwright/php-session)<br>[neoflow/session](neoflow/session) | ❌ |
+| Session | consider [compwright/php-session](compwright/php-session) | ❌ |
 | Cache | [pinga/cache](https://github.com/getpinga/cache) or [matthiasmullie/scrapbook](https://packagist.org/packages/matthiasmullie/scrapbook) | ❌ |
 | Backup | [PHPBU](https://phpbu.de/) | ❌ |
 | Payment | [utopia-php/pay](https://packagist.org/packages/utopia-php/pay) | ❌ |
