@@ -84,11 +84,11 @@
                   <div class="col-12 my-5">
                     <h1>{{ __('Invoice') }} {{ invoice_details.invoice_number }} {% set status = invoice_details.payment_status %}
                     <span class="badge 
-                        {% if status == 'unpaid' %}bg-red text-red-fg
+                        {% if status == 'unpaid' %}bg-orange text-orange-fg
                         {% elseif status == 'paid' %}bg-green text-green-fg
-                        {% elseif status == 'overdue' %}bg-orange text-orange-fg
+                        {% elseif status == 'overdue' %}bg-red text-red-fg
                         {% elseif status == 'cancelled' %}bg-grey text-grey-fg
-                        {% else %}bg-secondary
+                        {% else %}bg-dark
                         {% endif %}">
                         {{ status|capitalize }}
                     </span>

@@ -67,11 +67,6 @@ class FinancialsController extends Controller
             [ $invoice_details['user_id'] ]
         );
 
-        if (!in_array($invoice_details['payment_status'] ?? '', ['unpaid', 'overdue'], true)) {
-            $this->container->get('flash')->addMessage('error', 'This invoice cannot be paid because it is already settled or not payable.');
-            return $response->withHeader('Location', '/invoices')->withStatus(302);
-        }
-
         $currency = $userData['currency'] ?? null;
         $nin = $userData['nin'] ?? null;
         $billing_vat = $userData['vat_number'] ?? null;
@@ -176,6 +171,11 @@ class FinancialsController extends Controller
             'SELECT currency, nin, vat_number, nin_type FROM users WHERE id = ?',
             [ $invoice_details['user_id'] ]
         );
+
+        if (!in_array($invoice_details['payment_status'] ?? '', ['unpaid', 'overdue'], true)) {
+            $this->container->get('flash')->addMessage('error', 'This invoice cannot be paid because it is already settled or not payable');
+            return $response->withHeader('Location', '/invoices')->withStatus(302);
+        }
 
         $currency = $userData['currency'] ?? null;
         $nin = $userData['nin'] ?? null;

@@ -17,6 +17,36 @@
         `;
     }
     
+    function statusFormatter(cell) {
+        const value = cell.getValue();
+        let badgeClass = 'secondary';
+        let statusText = 'Unknown';
+
+        switch (value) {
+            case 'paid':
+                badgeClass = 'success';
+                statusText = 'Paid';
+                break;
+            case 'unpaid':
+                badgeClass = 'warning';
+                statusText = 'Unpaid';
+                break;
+            case 'overdue':
+                badgeClass = 'danger';
+                statusText = 'Overdue';
+                break;
+            case 'cancelled':
+                badgeClass = 'secondary';
+                statusText = 'Cancelled';
+                break;
+            default:
+                badgeClass = 'dark';
+                statusText = 'Unknown';
+        }
+
+        return `<span class="status status-${badgeClass}">${statusText}</span>`;
+    }
+    
     table = new Tabulator("#invoicesTable", {
         ajaxURL:"/api/records/invoices?join=users",
         ajaxConfig:"GET",
@@ -50,6 +80,7 @@
                     negativeSign: true
                 };
             }},
+            {title:"{{ __('Status') }}", field:"payment_status", minWidth:150, resizable:false, headerSort:true, formatter: statusFormatter, responsive:2},
             {title: "{{ __('Actions') }}", formatter: actionsFormatter, headerSort: false, download:false, hozAlign: "center", responsive:0, cellClick:function(e, cell){ e.stopPropagation(); }},
         ]
     });
@@ -62,7 +93,7 @@
                 // Check if any of the fields contain the search term
                 return (
                     String(data.invoice_number).toLowerCase().includes(term) ||
-                    String(data.registrar_id.name).toLowerCase().includes(term) ||
+                    String(data.user_id.username).toLowerCase().includes(term) ||
                     String(data.issue_date).toLowerCase().includes(term) ||
                     String(data.total_amount).toLowerCase().includes(term)
                 );
