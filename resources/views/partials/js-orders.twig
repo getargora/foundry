@@ -58,7 +58,7 @@
         clipboard:true,
         clipboardPasteAction:"replace",
         sortMode: "remote",
-        ajaxURL: "/api/records/orders",
+        ajaxURL: "/spark/orders",
         ajaxURLGenerator: function(url, config, params) {
             var queryParts = [];
 
@@ -107,12 +107,12 @@
         placeholder: "{{ __('No Data') }}",
         columns:[
             {formatter:"responsiveCollapse", width:40, minWidth:40, hozAlign:"center", resizable:false, headerSort:false, responsive:0},
-            {title:"{{ __('ID') }}", field:"id", minWidth:40, resizable:false, headerSort:true, responsive:0},
-            {title:"{{ __('Date') }}", field:"created_at", minWidth:220, resizable:false, headerSort:true, responsive:0},
-            {title:"{{ __('User') }}", field:"user_id", minWidth:100, resizable:false, headerSort:true, responsive:2},
+            {title:"{{ __('Order ID') }}", field:"id", minWidth:80, resizable:false, headerSort:true, responsive:0},
+            {title:"{{ __('Date') }}", field:"created_at", minWidth:220, resizable:false, headerSort:true, responsive:2},
+            {title:"{{ __('User') }}", field:"username", minWidth:100, resizable:false, headerSort:true, responsive:2},
             {title:"{{ __('Service') }}", field:"service_type", width:120, resizable:false, headerSort:true, responsive:2},
             {title:"{{ __('Status') }}", field:"status", minWidth:150, resizable:false, headerSort:true, formatter: statusFormatter, responsive:2},
-            {title:"{{ __('Amount') }}", field:"amount_due", resizable:false, minWidth:150, headerSort:true, responsive:0, formatter:"money",  formatterParams:function(cell){
+            {title:"{{ __('Amount') }}", field:"amount_due", resizable:false, minWidth:120, headerSort:true, responsive:0, formatter:"money",  formatterParams:function(cell){
                 return {
                     decimal: ".",
                     thousand: " ",
@@ -120,7 +120,7 @@
                     negativeSign: true
                 };
             }},
-            {title: "{{ __('Actions') }}", formatter: actionsFormatter, responsive:0, headerSort: false, download:false, hozAlign: "center", cellClick:function(e, cell){ e.stopPropagation(); }},
+            {title: "{{ __('Actions') }}", formatter: actionsFormatter, minWidth:120, responsive:0, headerSort: false, download:false, hozAlign: "center", cellClick:function(e, cell){ e.stopPropagation(); }},
         ]
     });
     var searchInput = document.getElementById("search-input");

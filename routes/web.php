@@ -21,6 +21,7 @@ use App\Controllers\OrdersController;
 use App\Controllers\ServicesController;
 use App\Controllers\ProvidersController;
 use App\Controllers\SupportController;
+use App\Controllers\SparkController;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\GuestMiddleware;
 use Slim\Exception\HttpNotFoundException;
@@ -115,6 +116,9 @@ $app->group('', function ($route) {
     $route->get('/lang', HomeController::class .':lang')->setName('lang');
     $route->get('/logout', AuthController::class . ':logout')->setName('logout');
     $route->post('/change-password', PasswordController::class . ':changePassword')->setName('change.password');
+
+    $route->get('/spark/orders', [SparkController::class, 'listOrders']);
+    $route->get('/spark/transactions', [SparkController::class, 'listTransactions']);
 })->add(new AuthMiddleware($container));
 
 $app->any('/api[/{params:.*}]', function (
