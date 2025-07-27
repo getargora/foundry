@@ -52,6 +52,12 @@ class FinancialsController extends Controller
         $invoice_details = $db->selectRow('SELECT * FROM invoices WHERE invoice_number = ?',
         [ $invoiceNumber ]
         );
+
+        if (!$invoice_details) {
+            $this->container->get('flash')->addMessage('error', 'Invoice not found');
+            return $response->withHeader('Location', '/invoices')->withStatus(302);
+        }
+
         $billing = $db->selectRow(
             'SELECT * FROM users_contact WHERE id = ? AND type = \'billing\'',
             [ $invoice_details['billing_contact_id'] ]
@@ -156,6 +162,12 @@ class FinancialsController extends Controller
         $invoice_details = $db->selectRow('SELECT * FROM invoices WHERE invoice_number = ?',
         [ $invoiceNumber ]
         );
+        
+        if (!$invoice_details) {
+            $this->container->get('flash')->addMessage('error', 'Invoice not found');
+            return $response->withHeader('Location', '/invoices')->withStatus(302);
+        }
+
         $billing = $db->selectRow(
             'SELECT * FROM users_contact WHERE id = ? AND type = \'billing\'',
             [ $invoice_details['billing_contact_id'] ]
