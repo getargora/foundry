@@ -213,24 +213,15 @@ $app->any('/api[/{params:.*}]', function (
             }
 
             $columnMap = [
-                'invoices' => 'user_id',
-                'statement' => 'user_id',
-                'support_tickets' => 'user_id', // Continues to use user_id
-                'users_audit' => 'user_id', // Continues to use user_id
+                'services',
+                'invoices',
+                'statement',
+                'support_tickets',
+                'users_audit',
             ];
 
-            // Check if the special filter condition for the domain table is met
-            $isSpecialDomainRequest = $tableName === 'domain' && isset($_GET['filter']) && $_GET['filter'] === 'trstatus,nis';
-
-            if (array_key_exists($tableName, $columnMap)) {
-                // If it's a special domain request, bypass the usual filtering
-                if ($isSpecialDomainRequest) {
-                    return [];
-                }
-
-                // Use registrarId for tables where 'registrar_id' is the filter
-                // For 'support_tickets' and 'users_audit', use userId
-                return [$columnMap[$tableName] => (in_array($tableName, ['support_tickets', 'users_audit']) ? $_SESSION['auth_user_id'] : $registrarId)];
+            if (in_array($tableName, $columnMap)) {
+                return ['user_id' => $_SESSION['auth_user_id']];
             }
 
             return ['1' => '0'];
