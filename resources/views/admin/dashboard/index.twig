@@ -81,7 +81,7 @@
                     </div>
                   </a>
                 </div>
-                <div class="col-sm-6 col-lg-3">
+                {% if roles == 0 %}<div class="col-sm-6 col-lg-3">
                   <a class="card card-link" href="{{route('listUsers')}}">
                     <div class="card-body">
                       <div class="row align-items-center">
@@ -98,7 +98,7 @@
                       </div>
                     </div>
                   </a>
-                </div>
+                </div>{% endif %}
                 <div class="col-sm-6 col-lg-3">
                   <a class="card card-link" href="{{route('ticketview')}}">
                     <div class="card-body">
