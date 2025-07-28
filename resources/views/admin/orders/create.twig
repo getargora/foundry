@@ -1,14 +1,8 @@
 {% extends "layouts/app.twig" %}
 
-{% block title %}{{ __('Create New Order') }}{% endblock %}
+{% block title %}{{ __('Create Order') }}{% endblock %}
 
 {% block content %}
-<style>
-  .card.cursor-pointer:hover {
-    border-color: #206bc4;
-    box-shadow: 0 0 0 2px rgba(32, 107, 196, 0.25);
-  }
-</style>
       <div class="page-wrapper">
         <!-- Page header -->
         <div class="page-header d-print-none">
@@ -24,12 +18,12 @@
                       <a href="{{route('listOrders')}}">{{ __('Orders') }}</a>
                     </li>
                     <li class="breadcrumb-item active">
-                      {{ __('Create New Order') }}
+                      {{ __('Create Order') }}
                     </li>
                   </ol>
                 </div>
                 <h2 class="page-title">
-                  {{ __('Create New Order') }}
+                  {{ __('Create Order') }}
                 </h2>
               </div>
             </div>
@@ -38,173 +32,162 @@
         <!-- Page body -->
         <div class="page-body">
           <div class="container-xl">
-            <div class="col-12">
             {% include 'partials/flash.twig' %}
-              <div class="card">
-                <div class="card-body">
-                  <form method="post" action="{{route('createOrder')}}" id="createOrderForm">
-                  {{ csrf.field | raw }}
 
-                    <div class="row">
-                      {% for provider in providers %}
-                        {% for code, product in provider.products %}
-                          {% if product.type == 'domain' %}
-                            <div class="col-md-4 mb-4">
-                              {% set safe_id = 'card-' ~ provider.id ~ '-' ~ code|replace({'.': '-', ':': '-'}) %}
-                              <label class="card h-100 cursor-pointer position-relative" id="{{ safe_id }}" onclick="selectProduct('{{ provider.id }}', '{{ code }}', '{{ safe_id }}')">
-                                <input type="radio" name="product_choice" class="form-check-input position-absolute top-0 end-0 m-3 z-index-3" value="{{ provider.id }}::{{ code }}" required>
-                                <div class="card-status-start bg-primary d-none"></div>
-                                <div class="card-body">
-                                  <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <span class="badge bg-blue text-blue-fg">from {{ currency }} {{ product.register['1']|default(0) }}/{{ product.billing }}</span>
-                                  </div>
-                                  <h4 class="card-title mb-0">{{ product.label }}</h4>
-                                  <p class="text-muted small mb-2">{{ provider.name }} — {{ product.description }}</p>
-                                  <div class="text-end">
-                                    <span class="badge bg-light text-light-fg">Click to configure</span>
-                                  </div>
-                                </div>
-                              </label>
-                            </div>
-                          {% endif %}
-                        {% endfor %}
-                      {% endfor %}
-                    </div>
+            {% if domainProducts|length > 0 %}
+            <div class="card mb-4">
+              <div class="card-body">
+                <h3 class="card-title">{{ __('Find Your Perfect Domain') }}</h3>
+                <p class="text-muted">{{ __('Start your online journey by searching for an available domain.') }}</p>
+                <form class="row g-2 align-items-stretch" onsubmit="checkDomain(event)">
+                  <div class="col-md-9">
+                    <input type="text" id="domainInput" class="form-control form-control-lg rounded" placeholder="example.com" required>
+                  </div>
+                  <div class="col-md-3 d-grid">
+                    <button class="btn btn-primary btn-lg w-100 rounded" type="submit">{{ __('Check') }}</button>
+                  </div>
+                </form>
+                <div id="resultContainer" class="mt-4"></div>
+              </div>
+            </div>
+            <style>
+            input[name="domain"],
+            button[type="submit"] {
+              height: calc(2.875rem + 2px);
+              border-radius: 0.5rem;
+            }
+            </style>
+            {% endif %}
 
-                    <div id="productFields" class="d-none">
-                      <h4>Order Details</h4>
-                      <div class="row g-3" id="dynamicFields">
-                        <!-- Dynamic domain/contact fields here -->
-                      </div>
-                    </div>
-                </div>
-                <div class="card-footer">
-                  <div class="row align-items-center">
-                    <div class="col-auto">
-                      <button type="submit" class="btn btn-primary">{{ __('Create Order') }}</button></form>
+            {% if otherProducts|length > 0 %}
+            <h3 class="mb-3">Other Services</h3>
+            <div class="row">
+              {% for item in otherProducts %}
+                {% set provider = item.provider %}
+                {% set product = item.product %}
+                <div class="col-md-4 mb-4">
+                  <div class="card h-100 cursor-pointer" onclick="showProductOptions('{{ provider.id }}', '{{ product.label }}')">
+                    <div class="card-body">
+                      <h4 class="card-title">{{ product.label }}</h4>
+                      <p class="text-muted small">{{ provider.name }} — {{ product.description }}</p>
+                      <span class="badge bg-blue text-blue-fg">from {{ currency }} {{ product.price }}/{{ product.billing }}</span>
                     </div>
                   </div>
                 </div>
+              {% endfor %}
             </div>
+            {% endif %}
+
+            <div id="productOptions" class="card mt-4 d-none">
+              <div class="card-body">
+                <h4>{{ __('Configure Product') }}</h4>
+                <form method="post" action="{{ route('createOrder') }}">
+                  {{ csrf.field | raw }}
+                  <input type="hidden" name="product_choice" id="selectedProductChoice">
+                  <div class="row g-3" id="dynamicFields"></div>
+                  <div class="mt-3"><button class="btn btn-primary">{{ __('Submit Order') }}</button></div>
+                </form>
+              </div>
+            </div>
+
           </div>
         </div>
         {% include 'partials/footer.twig' %}
       </div>
 <script>
-const productData = {{ providers|json_encode|raw }};
+const productData = {{ otherProducts|json_encode|raw }};
 const currency = {{ currency|json_encode|raw }};
 
-function selectProduct(providerId, productCode, cardId) {
-  document.querySelectorAll('.card .card-status-start').forEach(el => el.classList.add('d-none'));
+function showProductOptions(providerId, productLabel) {
+  const target = productData.find(p => p.provider.id == providerId && p.product.label == productLabel);
+  if (!target) return;
 
-  const selectedCard = document.getElementById(cardId);
-  if (selectedCard) {
-    const statusEl = selectedCard.querySelector('.card-status-start');
-    if (statusEl) statusEl.classList.remove('d-none');
-  }
+  const product = target.product;
+  const fieldsDiv = document.getElementById('dynamicFields');
+  const choiceInput = document.getElementById('selectedProductChoice');
 
-  document.querySelectorAll('input[name="product_choice"]').forEach(r => r.checked = false);
-  const inputEl = document.querySelector(`input[value="${providerId}::${productCode}"]`);
-  if (inputEl) inputEl.checked = true;
+  fieldsDiv.innerHTML = '';
+  choiceInput.value = `${providerId}::${productLabel}`;
+  document.getElementById('productOptions').classList.remove('d-none');
 
-  const provider = productData.find(p => p.id == providerId);
-  const product = provider.products[productCode];
+  fieldsDiv.innerHTML += `
+    <div class="col-md-6">
+      <label class="form-label">Service Name</label>
+      <input type="text" name="config[name]" class="form-control" required>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Billing Cycle</label>
+      <select name="config[cycle]" class="form-select" required>
+        <option value="monthly">Monthly</option>
+        <option value="yearly" selected>Yearly</option>
+      </select>
+    </div>
+  `;
 
-  document.getElementById('productFields').classList.remove('d-none');
-
-  const extra = document.getElementById('dynamicFields');
-
-  if (product.type === 'domain') {
-    const requiredFields = provider.credentials?.required_fields || {};
-
-    extra.innerHTML = `
-      <div class="col-md-8">
-        <label class="form-label">Domain Name</label>
-        <div class="input-group">
-          <input type="text" name="config[domain]" class="form-control" placeholder="yourname">
-          <span class="input-group-text">.com</span>
-        </div>
-        <small class="form-hint">Enter the domain name without TLD.</small>
-      </div>
-
-      <div class="col-md-4">
-        <label class="form-label">Registration Period</label>
-        <select name="config[years]" class="form-select" required>
-          ${Object.entries(product.register || {}).map(([year, price]) => 
-            `<option value="${year}">${year} year(s) (${currency} ${parseFloat(price).toFixed(2)})</option>`).join('')}
-        </select>
-      </div>
-
-      <div class="col-12">
-        <label class="form-label">Nameservers</label>
-        <div class="row g-2">
-          <div class="col-md-4"><input type="text" class="form-control" name="config[nameservers][]" placeholder="ns1.example.com" required></div>
-          <div class="col-md-4"><input type="text" class="form-control" name="config[nameservers][]" placeholder="ns2.example.com" required></div>
-          <div class="col-md-4"><input type="text" class="form-control" name="config[nameservers][]" placeholder="ns3.example.com (optional)"></div>
-        </div>
-      </div>
-
-      <div class="col-12 mt-4">
-        <label class="form-label">Registrant Contact</label>
-        <div class="form-selectgroup">
-          <label class="form-selectgroup-item">
-            <input type="radio" name="contact_mode" value="default" class="form-selectgroup-input" checked onchange="toggleContactFields(false)">
-            <span class="form-selectgroup-label">Use Default Contact</span>
-          </label>
-          <label class="form-selectgroup-item">
-            <input type="radio" name="contact_mode" value="custom" class="form-selectgroup-input" onchange="toggleContactFields(true)">
-            <span class="form-selectgroup-label">Enter New Contact</span>
-          </label>
-        </div>
-      </div>
-
-      <div id="contactFields" class="row g-3 mt-3 d-none">
+  if (product.fields) {
+    for (const [field, def] of Object.entries(product.fields)) {
+      fieldsDiv.innerHTML += `
         <div class="col-md-6">
-          <label class="form-label">Full Name</label>
-          <input type="text" name="config[contact][name]" class="form-control">
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Email</label>
-          <input type="email" name="config[contact][email]" class="form-control">
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Organization (optional)</label>
-          <input type="text" name="config[contact][org]" class="form-control">
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Phone</label>
-          <input type="text" name="config[contact][phone]" class="form-control" placeholder="+1.1234567890">
-        </div>
-        <div class="col-12">
-          <label class="form-label">Address</label>
-          <input type="text" name="config[contact][address]" class="form-control" placeholder="Street, City, Country">
-        </div>
-      </div>
-    `;
-    
-    Object.entries(requiredFields).forEach(([fieldName, fieldDef]) => {
-      const fieldType = fieldDef.type || 'text';
-      extra.innerHTML += `
-        <div class="col-md-6">
-          <label class="form-label">${fieldDef.label || fieldName}</label>
-          <input type="${fieldType}" name="config[${fieldName}]" class="form-control" placeholder="${fieldDef.hint || ''}" ${fieldDef.required ? 'required' : ''}>
+          <label class="form-label">${def.label || field}</label>
+          <input type="${def.type || 'text'}" name="config[${field}]" class="form-control" placeholder="${def.hint || ''}" ${def.required ? 'required' : ''}>
         </div>
       `;
-    });
-  } else {
-    extra.innerHTML = '';
+    }
   }
 }
 
-function toggleContactFields(show) {
-  const el = document.getElementById('contactFields');
-  if (el) {
-    if (show) {
-      el.classList.remove('d-none');
-    } else {
-      el.classList.add('d-none');
+async function checkDomain(event) {
+    event.preventDefault();
+    const domainInput = document.getElementById("domainInput");
+    const resultContainer = document.getElementById("resultContainer");
+
+    const domain = domainInput.value.trim();
+    if (!domain) {
+        resultContainer.innerHTML = '<div class="alert alert-warning">Please enter a domain name.</div>';
+        return;
     }
-  }
+
+    // Send POST request
+    try {
+        const response = await fetch('/dapi/domain/check', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ domain: [domain] }) // Sending domain array
+        });
+
+        const data = await response.json();
+        resultContainer.innerHTML = formatResult(data);
+    } catch (error) {
+        resultContainer.innerHTML = '<div class="alert alert-danger">An error occurred. Please try again.</div>';
+    }
+}
+
+function formatResult(data) {
+    if (!data.domains || data.domains.length === 0) {
+        return '<div class="alert alert-info">No results found.</div>';
+    }
+
+    return data.domains.map(domain => `
+                <div class="card border-${domain.available ? 'success' : 'danger'} mt-3">
+            <div class="card-body">
+                <h5 class="card-title">${domain.name}</h5>
+                <p class="card-text">
+                    <strong>Status:</strong> 
+                    <span class="badge bg-${domain.available ? 'success' : 'danger'} text-${domain.available ? 'success' : 'danger'}-fg">
+                        ${domain.available ? 'Available' : 'Not Available'}
+                    </span>
+                </p>
+                ${domain.reason ? `<p class="text-muted"><strong>Reason:</strong> ${domain.reason}</p>` : ''}
+                ${domain.available ? `
+                    <a href="/register?domain=${encodeURIComponent(domain.name)}" class="btn btn-success">
+                        Register
+                    </a>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
 }
 </script>
 {% endblock %}

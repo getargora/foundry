@@ -76,18 +76,32 @@ class OrdersController extends Controller
         $db = $this->container->get('db');
         $providers = $db->select("SELECT id, name, type, api_endpoint, credentials, pricing FROM providers WHERE status = 'active'");
 
+        $domainProducts = [];
+        $otherProducts = [];
+
         foreach ($providers as &$provider) {
             $rawProducts = json_decode($provider['pricing'], true) ?? [];
+            $credentials = json_decode($provider['credentials'], true) ?? [];
             $enrichedProducts = [];
 
-            foreach ($rawProducts as $tld => $actions) {
-                $enrichedProducts[$tld] = $actions;
-                $enrichedProducts[$tld]['type'] = 'domain';
-                $enrichedProducts[$tld]['label'] = $tld;
-                $enrichedProducts[$tld]['description'] = 'Domain services for ' . $tld;
-                $enrichedProducts[$tld]['price'] = $actions['register']['1'] ?? 0;
-                $enrichedProducts[$tld]['billing'] = 'year';
-                $enrichedProducts[$tld]['fields'] = [];
+            foreach ($rawProducts as $label => $actions) {
+                $product = [
+                    'type' => $provider['type'], // domain, server, etc.
+                    'label' => $label,
+                    'description' => ucfirst($provider['type']) . ' service: ' . $label,
+                    'price' => $actions['register']['1'] ?? $actions['price'] ?? 0,
+                    'billing' => $actions['billing'] ?? 'year',
+                    'fields' => $credentials['required_fields'] ?? [],
+                    'actions' => $actions,
+                ];
+
+                $enrichedProducts[$label] = $product;
+
+                if ($product['type'] === 'domain') {
+                    $domainProducts[] = ['provider' => $provider, 'product' => $product];
+                } else {
+                    $otherProducts[] = ['provider' => $provider, 'product' => $product];
+                }
             }
 
             $provider['products'] = $enrichedProducts;
@@ -95,8 +109,8 @@ class OrdersController extends Controller
         }
 
         return $this->container->get('view')->render($response, 'admin/orders/create.twig', [
-            'providers' => $providers,
-            'user' => $_SESSION['auth_user_id'] ?? null,
+            'domainProducts' => $domainProducts,
+            'otherProducts' => $otherProducts,
             'currency' => $_SESSION['_currency'] ?? 'EUR'
         ]);
     }
