@@ -174,7 +174,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `user_id` INT UNSIGNED NOT NULL,
   `service_type` VARCHAR(32) NOT NULL,        -- e.g. 'domain', 'hosting', 'ssl', 'product'
   `service_data` JSON DEFAULT NULL,           -- holds service-specific info like domain name, SKU, etc.
-  `status` ENUM('pending', 'active', 'failed', 'cancelled') NOT NULL DEFAULT 'pending',
+  `status` ENUM('pending', 'active', 'inactive', 'failed', 'cancelled') NOT NULL DEFAULT 'pending',
   `amount_due` DECIMAL(12,2) NOT NULL,
   `currency` CHAR(3) NOT NULL DEFAULT 'EUR',
   `invoice_id` INT UNSIGNED DEFAULT NULL,

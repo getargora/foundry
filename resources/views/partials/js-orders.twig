@@ -20,13 +20,10 @@
         let buttons = `
             <a class="btn btn-outline-primary btn-icon" href="/orders/${id}" title="{{ __('View Order') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></svg></a>`;
 
-        if (status === 'unpaid') {
+        if (status === 'pending') {
             buttons += `
              <a class="btn btn-outline-success btn-icon" href="/orders/${id}/pay" title="{{ __('Pay Now') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 5m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z" /><path d="M3 10l18 0" /><path d="M7 15l.01 0" /><path d="M11 15l2 0" /></svg></a> <a class="btn btn-outline-warning btn-icon" href="/orders/${id}/cancel" title="{{ __('Cancel Order') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M10 10l4 4m0 -4l-4 4" /></svg></a>`;
-        } else if (status === 'pending') {
-            buttons += `
-             <a class="btn btn-outline-warning btn-icon" href="/orders/${id}/cancel" title="{{ __('Cancel Order') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M10 10l4 4m0 -4l-4 4" /></svg></a>`;
-        } else if (status === 'paid' || status === 'inactive') {
+        } else if (status === 'inactive') {
             buttons += `
              <a class="btn btn-outline-info btn-icon" href="/orders/${id}/activate" title="{{ __('Activate Service') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" /></svg></a>`;
         } else if (status === 'failed') {
@@ -136,8 +133,8 @@
             {title:"{{ __('Date') }}", field:"created_at", minWidth:220, resizable:false, headerSort:true, responsive:2},
             {title:"{{ __('User') }}", field:"username", minWidth:100, resizable:false, headerSort:true, responsive:2},
             {title:"{{ __('Service') }}", field:"service_type", width:120, resizable:false, headerSort:true, responsive:2},
-            {title:"{{ __('Status') }}", field:"status", minWidth:150, resizable:false, headerSort:true, formatter: statusFormatter, responsive:2},
-            {title:"{{ __('Amount') }}", field:"amount_due", resizable:false, minWidth:120, headerSort:true, responsive:0, formatter:"money",  formatterParams:function(cell){
+            {title:"{{ __('Status') }}", field:"status", minWidth:130, resizable:false, headerSort:true, formatter: statusFormatter, responsive:2},
+            {title:"{{ __('Amount') }}", field:"amount_due", resizable:false, minWidth:110, headerSort:true, responsive:0, formatter:"money",  formatterParams:function(cell){
                 return {
                     decimal: ".",
                     thousand: " ",
@@ -145,7 +142,7 @@
                     negativeSign: true
                 };
             }},
-            {title: "{{ __('Actions') }}", formatter: actionsFormatter, minWidth:120, responsive:0, headerSort: false, download:false, hozAlign: "center", cellClick:function(e, cell){ e.stopPropagation(); }},
+            {title: "{{ __('Actions') }}", formatter: actionsFormatter, minWidth:200, responsive:0, headerSort: false, download:false, hozAlign: "center", cellClick:function(e, cell){ e.stopPropagation(); }},
         ]
     });
     var searchInput = document.getElementById("search-input");
