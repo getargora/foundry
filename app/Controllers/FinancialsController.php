@@ -84,12 +84,29 @@ class FinancialsController extends Controller
         $phone        = envi('COMPANY_PHONE');
         $email        = envi('COMPANY_EMAIL');
 
-        $issueDate = new \DateTime($invoice_details['issue_date']);
-        $firstDayPrevMonth = (clone $issueDate)->modify('first day of last month')->format('Y-m-d');
-        $lastDayPrevMonth = (clone $issueDate)->modify('last day of last month')->format('Y-m-d');
-        $statement = $db->select('SELECT * FROM transactions WHERE created_at BETWEEN ? AND ? AND user_id = ?',
-        [ $firstDayPrevMonth, $lastDayPrevMonth, $invoice_details['user_id'] ]
-        );
+        if ($invoice_details['invoice_type'] === 'deposit') {
+            $deposit = $db->selectRow(
+                'SELECT category, description, amount, currency, created_at
+                 FROM transactions
+                 WHERE related_entity_id = ?',
+                [ $invoice_details['id'] ]
+            );
+        } else {
+            $orders = $db->select(
+                'SELECT service_type, amount_due, currency, service_data, created_at 
+                 FROM orders 
+                 WHERE invoice_id = ?', 
+                [ $invoice_details['id'] ]
+            );
+
+            $locale = $_SESSION['_lang'] ?? 'en_US'; // Fallback to 'en_US' if no locale is set
+            $currencyFormatterStatement = new \NumberFormatter($locale, \NumberFormatter::CURRENCY);
+
+            foreach ($orders as &$order) {
+                $order['service_data'] = json_decode($order['service_data'], true);
+                $order['amount_formatted'] = $currencyFormatterStatement->formatCurrency($order['amount_due'], $order['currency']);
+            }
+        }
 
         $vatCalculator = new VatCalculator();
         $vatCalculator->setBusinessCountryCode(strtoupper($cc));
@@ -105,8 +122,6 @@ class FinancialsController extends Controller
         $totalAmount = $grossPrice + $taxValue;
         $billing_country = $iso3166->alpha2($billing['cc']);
         $billing_country = $billing_country['name'];
-
-        $locale = $_SESSION['_lang'] ?? 'en_US'; // Fallback to 'en_US' if no locale is set
 
         // Initialize the number formatter for the locale
         $numberFormatter = new \NumberFormatter($locale, \NumberFormatter::DECIMAL);
@@ -124,7 +139,8 @@ class FinancialsController extends Controller
             'billing' => $billing,
             'billing_company' => $nin,
             'billing_vat' => $billing_vat,
-            'statement' => $statement,
+            'statement' => $orders,
+            'deposit' => $deposit,
             'company_name' => $company_name,
             'address' => $address,
             'address2' => $address2,
@@ -192,17 +208,21 @@ class FinancialsController extends Controller
         $taxValue = $vatCalculator->getTaxValue(); 
         $totalAmount = $grossPrice + $taxValue;
         $locale = $_SESSION['_lang'] ?? 'en_US'; // Fallback to 'en_US' if no locale is set
+        $stripe_key = envi('STRIPE_PUBLISHABLE_KEY');
 
         $currencyFormatter = new \NumberFormatter($locale, \NumberFormatter::CURRENCY);
         $formattedTotalAmount = $currencyFormatter->formatCurrency($totalAmount, $currency);
 
         $enabledGateways = array_map('trim', explode(',', envi('ENABLED_GATEWAYS')));
+        $_SESSION['pending_invoice_amount'] = $totalAmount;
+        $_SESSION['pending_invoice_id'] = $invoiceNumber;
 
         // Pass formatted values to Twig
         return view($response, 'admin/financials/payInvoice.twig', [
             'invoice_details' => $invoice_details,
             'total' => $formattedTotalAmount,
             'currentUri' => $uri,
+            'stripe_key' => $stripe_key,
             'enabledGateways' => $enabledGateways,
         ]);
 
@@ -328,9 +348,19 @@ class FinancialsController extends Controller
     {
         $postData = $request->getParsedBody();
         $amount = $postData['amount'] ?? null;
+
+        if (!$amount && isset($_SESSION['pending_invoice_amount'])) {
+            $amount = $_SESSION['pending_invoice_amount'];
+            $paymentDescription = 'Invoice Payment #' . ($_SESSION['pending_invoice_id'] ?? '');
+            unset($_SESSION['pending_invoice_amount']);
+            unset($_SESSION['pending_invoice_id']);
+        } else {
+            $paymentDescription = 'Client Balance Deposit';
+        }
+
         $amount = filter_var($amount, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-        \Stripe\Stripe::setApiKey(envi('STRIPE_SECRET_KEY'));
         $amountInCents = (int) round($amount * 100);
+        \Stripe\Stripe::setApiKey(envi('STRIPE_SECRET_KEY'));
 
         // Create Stripe Checkout session
         $checkout_session = \Stripe\Checkout\Session::create([
@@ -339,7 +369,7 @@ class FinancialsController extends Controller
                 'price_data' => [
                     'currency' => $_SESSION['_currency'],
                     'product_data' => [
-                        'name' => 'Client Balance Deposit',
+                        'name' => $paymentDescription,
                     ],
                     'unit_amount' => $amountInCents,
                 ],
@@ -359,6 +389,13 @@ class FinancialsController extends Controller
     {
         $postData = $request->getParsedBody();
         $amount = $postData['amount'] ?? null;
+
+        if (!$amount && isset($_SESSION['pending_invoice_amount'])) {
+            $amount = $_SESSION['pending_invoice_amount'];
+            unset($_SESSION['pending_invoice_amount']);
+            unset($_SESSION['pending_invoice_id']);
+        }
+
         $amount = filter_var($amount, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
         $amountInCents = (int) round($amount * 100);
 
@@ -395,6 +432,13 @@ class FinancialsController extends Controller
     {
         $postData = $request->getParsedBody();
         $amount = $postData['amount'] ?? null;
+
+        if (!$amount && isset($_SESSION['pending_invoice_amount'])) {
+            $amount = $_SESSION['pending_invoice_amount'];
+            unset($_SESSION['pending_invoice_amount']);
+            unset($_SESSION['pending_invoice_id']);
+        }
+
         $amount = filter_var($amount, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
         $amountWhole = (int) round($amount);
 
@@ -443,10 +487,20 @@ class FinancialsController extends Controller
     {
         $postData = $request->getParsedBody();
         $amount = $postData['amount'] ?? null;
+        $userId = $_SESSION["auth_user_id"];
+
+        if (!$amount && isset($_SESSION['pending_invoice_amount'])) {
+            $amount = $_SESSION['pending_invoice_amount'];
+            $paymentDescription = 'Invoice Payment #' . ($_SESSION['pending_invoice_id'] ?? '');
+            unset($_SESSION['pending_invoice_amount']);
+            unset($_SESSION['pending_invoice_id']);
+        } else {
+            $paymentDescription = 'Client Balance Deposit (' . $userId .')';
+        }
+
         $amount = filter_var($amount, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
         $amountWhole = (int) round($amount);
 
-        $userId = $_SESSION["auth_user_id"];
         $invoiceReference = strtoupper(bin2hex(random_bytes(5)));
 
         // Map currency to Nicky's blockchainAssetId
@@ -462,7 +516,7 @@ class FinancialsController extends Controller
             'amountExpectedNative' => $amountWhole,
             'billDetails' => [
                 'invoiceReference' => $invoiceReference,
-                'description' => 'Deposit for registrar ' . $userId,
+                'description' => $paymentDescription,
             ],
             'requester' => [
                 'email' => $_SESSION['auth_email'],
