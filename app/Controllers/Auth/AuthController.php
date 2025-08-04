@@ -50,8 +50,10 @@ class AuthController extends Controller
      * @throws \Pinga\Auth\AuthError
      */
     public function register(Request $request, Response $response){
+        global $container;
+        $validator = $container->get('validator');
 
-        $validation = $this->validator->validate($request, [
+        $validation = $validator->validate($request, [
             'email' => v::noWhitespace()->notEmpty()->email(),
             'username' => v::noWhitespace()->notEmpty()->alnum(),
             'password' => v::notEmpty()->stringType()->length(8),
@@ -59,15 +61,13 @@ class AuthController extends Controller
 
         if ($validation->failed()) {
             redirect()->route('register');
-            //or
-            //return $response->withHeader('Location', route('register'));
         }
         $data = $request->getParsedBody();
-        $auth =Auth::create($data['email'],$data['password'],$data['username']);
+        $auth = Auth::create($data['email'],$data['password'],$data['username']);
         if($auth) {
             $msg = '<a href="'.route('verify.email.resend',[],['email'=>$data['email']]).'">Resend email</a>';
-            flash('success', 'We have send you a verification link to '.$data['email'].' <br>'.$msg);
-            return $response->withHeader('Location', route('login'));
+            $container->get('flash')->addMessage('success', 'We have send you a verification link to '.$data['email'].' <br>'.$msg);
+            return $response->withHeader('Location', '/login')->withStatus(302);
         }
 
     }
