@@ -1,4 +1,5 @@
 <script src="/assets/modules/js/tabulator.min.js" defer></script>
+<script src="/assets/modules/js/sweetalert2.min.js" defer></script>
 <script src="/assets/js/tabler.min.js" defer></script>
 <script src="/assets/modules/js/jspdf.umd.min.js" defer></script>
 <script src="/assets/modules/js/jspdf.plugin.autotable.min.js" defer></script>
@@ -15,6 +16,7 @@
     function actionsFormatter(cell, formatterParams, onRendered) {
         const rowData = cell.getRow().getData();
         const id = rowData.id;
+        const invoice_id = rowData.invoice_id;
         const status = rowData.status;
 
         let buttons = `
@@ -22,13 +24,16 @@
 
         if (status === 'pending') {
             buttons += `
-             <a class="btn btn-outline-success btn-icon" href="/orders/${id}/pay" title="{{ __('Pay Now') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 5m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z" /><path d="M3 10l18 0" /><path d="M7 15l.01 0" /><path d="M11 15l2 0" /></svg></a> <a class="btn btn-outline-warning btn-icon" href="/orders/${id}/cancel" title="{{ __('Cancel Order') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M10 10l4 4m0 -4l-4 4" /></svg></a>`;
+             <a class="btn btn-outline-success btn-icon" href="/invoice/${invoice_id}/pay" title="{{ __('Pay Now') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 5m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z" /><path d="M3 10l18 0" /><path d="M7 15l.01 0" /><path d="M11 15l2 0" /></svg></a> <a class="btn btn-outline-warning btn-icon cancel-btn" title="{{ __('Cancel Order') }}" id="cancel-btn" href="javascript:void(0);" data-cancel-url="/orders/${id}/cancel" "><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M10 10l4 4m0 -4l-4 4" /></svg></a>`;
         } else if (status === 'inactive') {
             buttons += `
-             <a class="btn btn-outline-info btn-icon" href="/orders/${id}/activate" title="{{ __('Activate Service') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" /></svg></a>`;
+             <a class="btn btn-outline-info btn-icon" href="/orders/${id}/activate" title="{{ __('Activate Service') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" /></svg></a> <a class="btn btn-outline-purple btn-icon" href="/orders/${id}/retry" title="{{ __('Retry Payment') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg></a> <a class="btn btn-outline-danger btn-icon" href="/orders/${id}/delete" title="{{ __('Delete Order') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7h16" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /><path d="M10 12l4 4m0 -4l-4 4" /></svg></a>`;
         } else if (status === 'failed') {
             buttons += `
-             <a class="btn btn-outline-info btn-icon" href="/orders/${id}/activate" title="{{ __('Activate Service') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" /></svg></a> <a class="btn btn-outline-purple btn-icon" href="/orders/${id}/retry" title="{{ __('Retry Payment') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg></a> <a class="btn btn-outline-danger btn-icon" href="/orders/${id}/delete" title="{{ __('Delete Order') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7h16" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /><path d="M10 12l4 4m0 -4l-4 4" /></svg></a>`;
+             <a class="btn btn-outline-info btn-icon" href="/orders/${id}/activate" title="{{ __('Activate Service') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" /></svg></a>`;
+        } else if (status === 'cancelled') {
+            buttons += `
+             <a class="btn btn-outline-purple btn-icon" href="/orders/${id}/retry" title="{{ __('Retry Payment') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /></svg></a> <a class="btn btn-outline-danger btn-icon" href="/orders/${id}/delete" title="{{ __('Delete Order') }}"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7h16" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /><path d="M10 12l4 4m0 -4l-4 4" /></svg></a>`;
         }
 
         return buttons;
@@ -45,19 +50,23 @@
                 statusText = 'Active';
                 break;
             case 'pending':
-                badgeClass = 'warning';
+                badgeClass = 'yellow';
                 statusText = 'Pending';
+                break;
+            case 'inactive':
+                badgeClass = 'azure';
+                statusText = 'Inactive';
                 break;
             case 'failed':
                 badgeClass = 'danger';
                 statusText = 'Failed';
                 break;
             case 'cancelled':
-                badgeClass = 'secondary';
+                badgeClass = 'purple';
                 statusText = 'Cancelled';
                 break;
             default:
-                badgeClass = 'dark';
+                badgeClass = 'light';
                 statusText = 'Unknown';
         }
 
@@ -129,10 +138,10 @@
         placeholder: "{{ __('No Data') }}",
         columns:[
             {formatter:"responsiveCollapse", width:40, minWidth:40, hozAlign:"center", resizable:false, headerSort:false, responsive:0},
-            {title:"{{ __('Order ID') }}", field:"id", minWidth:80, resizable:false, headerSort:true, formatter: orderLinkFormatter, responsive:0},
+            {title:"{{ __('Order ID') }}", field:"id", minWidth:50, resizable:false, headerSort:true, formatter: orderLinkFormatter, responsive:0},
             {title:"{{ __('Date') }}", field:"created_at", minWidth:220, resizable:false, headerSort:true, responsive:2},
-            {title:"{{ __('User') }}", field:"username", minWidth:100, resizable:false, headerSort:true, responsive:2},
-            {title:"{{ __('Service') }}", field:"service_type", width:120, resizable:false, headerSort:true, responsive:2},
+            {title:"{{ __('User') }}", field:"username", minWidth:80, resizable:false, headerSort:true, responsive:2},
+            {title:"{{ __('Service') }}", field:"service_type", width:160, resizable:false, headerSort:true, responsive:2},
             {title:"{{ __('Status') }}", field:"status", minWidth:130, resizable:false, headerSort:true, formatter: statusFormatter, responsive:2},
             {title:"{{ __('Amount') }}", field:"amount_due", resizable:false, minWidth:110, headerSort:true, responsive:0, formatter:"money",  formatterParams:function(cell){
                 return {
@@ -141,8 +150,26 @@
                     symbol: (cell.getRow().getData().currency || "$") + " ", // Ensures space after currency symbol
                     negativeSign: true
                 };
+            }},        
+            {title: "{{ __('Actions') }}", formatter: actionsFormatter, minWidth:200, responsive:0, resizable:false, headerSort:false, download:false, hozAlign: "center", cellClick: function(e, cell){
+                if (e.target.closest('.cancel-btn')) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: "{{ __('Are you sure?') }}",
+                        text: "{{ __('This will cancel the order permanently.') }}",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: "{{ __('Yes, cancel it') }}",
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        let cancelUrl = e.target.closest('.cancel-btn').getAttribute('data-cancel-url');
+                        window.location.href = cancelUrl;
+                      }
+                    });
+                }
             }},
-            {title: "{{ __('Actions') }}", formatter: actionsFormatter, minWidth:200, responsive:0, headerSort: false, download:false, hozAlign: "center", cellClick:function(e, cell){ e.stopPropagation(); }},
         ]
     });
     var searchInput = document.getElementById("search-input");
