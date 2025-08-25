@@ -61,7 +61,8 @@
         "league/iso3166": "^4.3.3",
         "stripe/stripe-php": "^17.4.0",
         "adyen/php-api-library": "^28.1",
-        "argora/tabler-assets": "^1.4"
+        "argora/tabler-assets": "^1.4",
+        "liqpay/liqpay": "^1.4"
     },
     "autoload": {
         "psr-4": {
