@@ -51,7 +51,6 @@ $app->group('', function ($route) {
     $route->get('/update-password', PasswordController::class.':createUpdatePassword')->setName('update.password');
     $route->post('/update-password', PasswordController::class.':updatePassword');
 
-    $route->post('/webhook/plata', FinancialsController::class .':webhookPlata')->setName('webhookPlata');
     $route->post('/webhook/adyen', FinancialsController::class .':webhookAdyen')->setName('webhookAdyen');
 })->add(new GuestMiddleware($container));
 
