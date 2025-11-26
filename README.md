@@ -25,22 +25,6 @@
 
 *Argora Foundry* is not a full-stack framework, but a focused foundation. It gives you the essentials—routing, user management, templates, modular structure—without locking you in. You stay in control of your stack, while we handle the heavy lifting.
 
-## 🧩 Components
-
-(TBD)
-
-| Category | Package | Integrated |
-| --- | --- | --- |
-| Storage | [league/flysystem](https://packagist.org/packages/league/flysystem) | ❌ |
-| Cookies | consider [dflydev/dflydev-fig-cookies] | ❌ |(https://packagist.org/packages/dflydev/dflydev-fig-cookies) | ❌ |
-| Session | consider [compwright/php-session](compwright/php-session) | ❌ |
-| Cache | [pinga/cache](https://github.com/getpinga/cache) or [matthiasmullie/scrapbook](https://packagist.org/packages/matthiasmullie/scrapbook) | ❌ |
-| Backup | [PHPBU](https://phpbu.de/) | ❌ |
-| Payment | [utopia-php/pay](https://packagist.org/packages/utopia-php/pay) | ❌ |
-| DB Audit | [setbased/php-audit](https://packagist.org/packages/setbased/php-audit) | ❌ |
-| KYC | [Ballerine](https://github.com/ballerine-io/ballerine) | ❌ | N/A | ❌ |
-| Benchmark | [eypsilon/MycroBench](https://packagist.org/packages/eypsilon/MycroBench) or [phpbench/phpbench](https://packagist.org/packages/phpbench/phpbench) | ❌ |
-
 ## 📦 Installation
 
 To create a new project using Argora Foundry:
