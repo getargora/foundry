@@ -48,7 +48,7 @@
         "gettext/gettext": "^5.7.3",
         "punic/punic": "^3.8.1",
         "ramsey/uuid": "^4.9",
-        "giggsey/libphonenumber-for-php-lite": "^8.13.36",
+        "giggsey/libphonenumber-for-php-lite": "^9.0.23",
         "bjeavons/zxcvbn-php": "^1.4.2",
         "mevdschee/php-crud-api": "^2.14.30",
         "robthree/twofactorauth": "^3.0.2",
